@@ -1,0 +1,40 @@
+upstream qubic_upstream {
+  server 127.0.0.1:3000;
+  keepalive 64;
+}
+
+server {
+    listen 80;
+    root /home/qube/app/public;
+    index index.html index.htm;
+
+    server_name qubic.io www.qubic.io;
+
+    if ($host = 'qubic.io' ) {
+            rewrite  ^/(.*)$  http://www.qubic.io/$1  permanent;
+    }
+
+    location ~ ^/(images/|img/|javascript/|js/|css/|stylesheets/|flash/|media/|static/|robots.txt|humans.txt|favicon.ico) {
+      access_log off;
+      expires 1M;
+      add_header Cache-Control "public";
+    }
+
+    location @proxy {
+      proxy_redirect off;
+      proxy_buffering off;
+      proxy_set_header   X-Real-IP            $remote_addr;
+      proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+      proxy_set_header   X-Forwarded-Proto $scheme;
+      proxy_set_header   Host                   $http_host;
+      proxy_set_header   X-NginX-Proxy    true;
+      proxy_set_header   Connection "";
+      proxy_http_version 1.1;
+      proxy_pass         http://qubic_upstream;
+      error_page 502     @try_static;
+    }
+
+    location @try_static {
+      try_files $uri $uri/ =502;
+    }
+}

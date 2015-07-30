@@ -1,0 +1,61 @@
+extends layout
+
+block vars
+  - var bodyClass = 'login-page access-page has-full-screen-bg';
+      
+block content
+  .upper-wrapper
+      // ******HEADER******
+      header.header
+        .container
+          h1.logo
+            a(href='/')
+              span.logo-icon
+              span.text Qubic
+      // ******Login Section******
+      section.login-section.access-section.section
+        .container
+          .row
+            .form-box.col-md-8.col-sm-12.col-xs-12.col-md-offset-2.col-sm-offset-0.xs-offset-0
+              .form-box-inner
+                h2.title.text-center Log in to Qubic             
+                .row
+                  .form-container.col-md-5.col-sm-12.col-xs-12
+                    form.login-form(action='/login',method='post')
+                      .form-group.email
+                        label.sr-only(for='login-email') Email or username                                
+                        input#login-email.form-control.login-email(type='email',placeholder='Email or username', name='email')
+                      .form-group.password
+                        label.sr-only(for='login-password') Password                 
+                        input#login-password.form-control.login-password(type='password', placeholder='Password', name='password')               
+                        p.forgot-password
+                          a(href='/reset-password') Forgot password?
+                      button.btn.btn-block.btn-cta-primary(type='submit') Log in                              
+                      .checkbox.remember
+                        label
+                          input(type='checkbox')
+                          |  Remember me
+                      p.lead
+                        | Don&apos;t have a Qubic account yet? 
+                        br
+                        a.signup-link(href='signup') Create your account now
+                  .social-btns.col-md-5.col-sm-12.col-xs-12.col-md-offset-1.col-sm-offset-0.col-sm-offset-0
+                    .divider
+                      span Or                                 
+                    ul.list-unstyled.social-login
+                      li
+                        a.twitter-btn.btn(href='/auth/twitter')
+                          i.fa.fa-twitter
+                          | Log in with Twitter                                    
+                      li
+                        a.facebook-btn.btn(href='/auth/facebook')
+                          i.fa.fa-facebook
+                          | Log in with Facebook                                   
+                      li
+                        a.github-btn.btn(href='/auth/github')
+                          i.fa.fa-github-alt
+                          | Log in with Github                                   
+                      li
+                        a.google-btn.btn(href='/auth/google')
+                          i.fa.fa-google-plus
+                          | Log in with Google

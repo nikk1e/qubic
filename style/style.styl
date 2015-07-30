@@ -1,0 +1,213 @@
+body {
+	font-family: 'Roboto', arial, sans-serif;
+	color: #114;
+	line-height: 28.5px;
+	font-size: 17px;
+}
+
+h1 {
+	font-size: 42px;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-weight: 300;
+	color: rgb(75, 75, 75);
+}
+
+/* fix line height change due to sub/sup */
+sup, sub {
+   vertical-align: baseline;
+   position: relative;
+   top: -0.4em;
+}
+sub { top: 0.4em; }
+
+.shareForm {
+	padding-bottom: 1em;
+	border-bottom: 1px solid #ddd;
+}
+
+.content {
+	margin: auto;
+	max-width: 700px;
+}
+
+
+.icon_link {
+	display: block;
+    position: absolute;
+    margin: 15px;
+}
+
+  .icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    fill: rgb(175, 175, 175);
+  }
+
+div.encrypted {
+	display: relative;
+background: rgb(250, 250, 250);
+margin: 3em auto;
+border-top: 1px solid #ddd;
+border-bottom: 1px solid #ddd;
+}
+
+.pure-form {
+	margin-bottom: 1em;
+}
+
+div.result {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+div.result pre {
+	background: rgb(113, 179, 253);
+}
+
+div.result pre.error {
+	background: rgb(253, 116, 111);
+}
+
+td.error, th.error {
+	background: rgb(253, 116, 111);
+}
+
+div.result td.category {
+	background-color: rgb(216,230,242);
+}
+div.result th.category {
+	background-color: rgb(134,192,241);
+}
+
+td.output {
+	background-color: rgb(216,230,242);
+}
+
+td.highlight {
+	background-color: rgb(255,250,229);
+}
+th.highlight {
+	background-color: rgb(255,234,133);
+}
+
+
+section hr {
+	display: block;
+	width: 100px;
+	margin: 3em auto 3em auto;
+	border: 0;
+	border-top: 1px solid rgba(0,0,0,0.15);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	empty-cells: show;
+	border: 1px solid #cbcbcb;
+}
+
+th, td {
+	text-align: left;
+	border-left: 1px solid #cbcbcb;
+	border-width: 0 0 0 1px;
+	font-size: inherit;
+	margin: 0;
+	overflow: visible;
+	padding: .5em 1em;
+	border-bottom: 1px solid #cbcbcb;
+}
+
+thead {
+background: #e0e0e0;
+color: #000;
+text-align: left;
+vertical-align: bottom;
+}
+
+textarea.hiddenTextArea {
+width: 100%;
+max-width: 800px;
+height: 50px;
+opacity: 0;
+position: absolute;
+left: -3000px;
+}
+/*
+::-moz-selection {
+    opacity:  0;
+}
+
+::selection {
+    opacity: 0;
+}
+*/
+.editor {
+	position: relative;
+	/*white-space: pre-wrap;*/
+}
+
+.selected {
+	background: rgb(179,216,253);
+}
+
+table.pure-table td.selected,
+table.pure-table th.selected,
+td.selected,
+th.selected {
+	background: rgb(179,216,253);
+}
+
+span {
+	padding-bottom: 5px;
+	padding-top: 3px;
+}
+
+span.cursor {
+
+	padding-bottom: 5px;
+	padding-top: 3px;
+	margin: -1px;
+	border: 1px solid red;
+	z-index: 100;
+}
+
+sup, sub {
+  font-size: 0.7em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+  top: -0.4em;
+}
+sub {
+	top: 0.4em;
+}
+
+sup span {
+	padding-bottom: 11px;
+}
+sub span {
+	padding-top: 12.5px;
+}
+
+.selection {
+	top: 0px;
+	left: 0px;
+	z-index: 100;
+}
+
+.selection div {
+	position: absolute;
+	background: rgba(114,190,215,0.5);
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+pre {
+	padding: 1em;
+	background: rgba(0,0,0,0.05);
+}

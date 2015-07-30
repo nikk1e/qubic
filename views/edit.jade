@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  #preview
+  script(type="text/javascript").
+    var docId = '#{docId}';
+    var docCollection = 'play';
+  script(type='text/javascript' src='/channel/bcsocket.js')
+  script(type='text/javascript' src='/javascript/main.js')

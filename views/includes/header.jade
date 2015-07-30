@@ -1,0 +1,47 @@
+// ******HEADER******
+header#header.header.navbar-fixed-top
+  .container
+    h1.logo
+      a(href='/')
+        span.text Qubic
+    nav.main-nav.navbar-right(role='navigation')
+      .navbar-header
+        button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbar-collapse')
+          span.sr-only Toggle navigation                     
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+      #navbar-collapse.navbar-collapse.collapse
+        ul.nav.navbar-nav
+          if !user
+            li.nav-item(class=(active === 'home')? "active" : "")
+              a(href='/') Home
+            li.nav-item(class=(active === 'features')? "active" : "")
+              a(href='/features') Features
+            li.nav-item(class=(active === 'pricing')? "active" : "")
+              a(href='/pricing') Pricing
+            li.nav-item.dropdown
+              a.dropdown-toggle(data-toggle='dropdown', data-  hover='dropdown', data-delay='0', data-close-  others='false', href='#') Pages 
+                i.fa.fa-angle-down
+              ul.dropdown-menu
+                li(class=(active === 'blog')? "active" : "")
+                  a(href='/blog') Blog
+                li(class=(active === 'about')? "active" : "")
+                  a(href='/about') About Us
+                li(class=(active === 'contact')? "active" : "")
+                  a(href='/contact') Contact
+          else
+            li.nav-item(class=(active === 'profile')? 'active' : '')
+              a(href='/') Profile
+            li.nav-item
+              a(href='#') Help
+          if user
+            li.nav-item
+              a(href='/logout') Log out
+            li.nav-item.nav-item-cta.last
+              a.btn.btn-cta.btn-cta-secondary(href='/play') New Qube
+          else
+            li.nav-item
+              a(href='/login') Log in
+            li.nav-item.nav-item-cta.last
+              a.btn.btn-cta.btn-cta-secondary(href='/signup') Sign Up Free

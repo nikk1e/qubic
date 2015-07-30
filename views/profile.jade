@@ -1,0 +1,104 @@
+extends layout
+
+block vars
+  - var bodyClass = 'about-page';
+  - var active = 'profile'
+
+block header
+  include ./includes/header.jade
+
+block content
+    .headline-bg.about-headline-bg
+    // //headline-bg
+    section.story-section.section.section-on-bg
+      h2.title.container.text-center Your Profile
+      .story-container.container.text-center
+        .story-container-inner
+          .row
+            h3.text-center
+              | Social animal? Connect your Qubic profile to the world.
+            if user.local.email
+              .row
+                .col-sm-6.col-xs-12
+                  .well
+                    h3
+                      span.fa.fa-user
+                      |  Local
+                    p
+                      strong id
+                      |: #{user._id}
+                      br
+                      strong email
+                      |: #{user.local.email}
+                      br
+                    a.btn.btn-default(href='/unlink/local') Unlink
+            .row
+              .col-sm-6.col-xs-12
+                .well
+                  h3
+                    span.fa.fa-facebook
+                    |  Facebook
+                  if user.facebook.token
+                    p
+                      strong email
+                      |: #{user.facebook.email}
+                      br
+                      strong name
+                      |: #{user.facebook.name}
+                      br
+                    a.btn.btn-default(href='/unlink/facebook') Unlink
+                  else
+                    a.btn.btn-default(href='/connect/facebook') Connect Facebook
+              .col-sm-6.col-xs-12
+                .well
+                  h3
+                    span.fa.fa-github
+                    |  Github
+                  if user.github.token
+                    p
+                      strong username
+                      |: #{user.github.username}
+                      br
+                      if user.github.email
+                        strong email
+                        |: #{user.github.email}
+                        br
+                      strong name
+                      |: #{user.github.displayName}
+                      br
+                    a.btn.btn-default(href='/unlink/github') Unlink
+                  else
+                    a.btn.btn-default(href='/connect/github') Connect Github
+            .row
+              .col-sm-6.col-xs-12
+                .well
+                  h3
+                    span.fa.fa-twitter
+                    |  Twitter
+                  if user.twitter.token
+                    p
+                      strong username
+                      |: #{user.twitter.username}
+                      br
+                      strong name
+                      |: #{user.twitter.displayName}
+                      br
+                    a.btn.btn-default(href='/unlink/twitter') Unlink
+                  else
+                    a.btn.btn-default(href='/connect/twitter') Connect Twitter
+              .col-sm-6.col-xs-12
+                .well
+                  h3
+                    span.fa.fa-google
+                    |  Google
+                  if user.google.token
+                    p
+                      strong email
+                      |: #{user.google.email}
+                      br
+                      strong name
+                      |: #{user.google.name}
+                      br
+                    a.btn.btn-default(href='/unlink/google') Unlink
+                  else
+                    a.btn.btn-default(href='/connect/google') Connect Google

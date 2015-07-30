@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# visudo .. qube ALL = (root) NOPASSWD: /sbin/start qubic, /sbin/stop qubic
+
+ssh qube@qubic.io <<\EOF
+  export PATH=$PATH:./node_modules/.bin
+  cd ~/app
+  git pull
+# npm install --production 
+# ^^^ far too expensive to run on a little 256MB box with no swap
+  npm run build
+  sudo /sbin/restart qubic
+EOF
