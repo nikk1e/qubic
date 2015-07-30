@@ -114,7 +114,7 @@ app.use(function(req,res,next){
 
 require('./routes/index')(app, passport);
 var admin = require('./routes/admin');
-app.use('/admin', users);
+app.use('/admin', admin);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
