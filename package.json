@@ -9,7 +9,7 @@
     "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js",
     "watch-js": "watchify client/main.js -o public/javascript/main.js -v",
     "watch-assets": "npm run watch-css & npm run watch-js",
-    "watch-server": "nodemon --ignore style/ --ignore public/ --ignore client/ --ignore test/ ./bin/www",
+    "watch-server": "nodemon --ignore style/ --ignore public/ --ignore client/ --ignore test/ ./bin/www --ignore node_modules/",
     "watch": "npm run watch-assets & npm run watch-server",
     "watch-win": "start npm run watch-css & start npm run watch-js & start npm run watch-server",
     "build": "npm run build-js & npm run build-css",
