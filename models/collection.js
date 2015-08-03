@@ -1,7 +1,6 @@
 var mongoose = require('mongoose');
 
-//Called category so it doesn't conflict with "collection" keyword in Mongo
-var categorySchema = mongoose.Schema({
+var collectionSchema = mongoose.Schema({
 	name :        { type: String, index: { unique: true }},
 	title:        String,
 	description:  String,
@@ -12,6 +11,10 @@ var categorySchema = mongoose.Schema({
 	readers:      [String]
 });
 
-categorySchema.index({title: 'text', description: 'text'});
+collectionSchema.index({title: 'text', description: 'text'},{
+	weights:{
+		title:5
+	}
+});
 
-module.exports = mongoose.model('Category', categorySchema);
+module.exports = mongoose.model('Collection', collectionSchema);
