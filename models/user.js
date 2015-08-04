@@ -1,5 +1,6 @@
 // load the things we need
-var mongoose = require('mongoose');
+var mongoose = require('mongoose')
+  , Schema   = mongoose.Schema;
 var bcrypt   = require('bcrypt-nodejs');
 
 // define the schema for our user model
@@ -9,12 +10,13 @@ var userSchema = mongoose.Schema({
     email            : String,
     displayName      : String, //Set to same as name initially
     bio              : String,
-    writer           : [String],
-    owner            : [String],
-    reader           : [String],
-    following        : [String],
+    //manual collection references
+    following        : [{ type: Schema.Types.ObjectId, ref: 'Collection' }],
+    //manual document references
+    drafts           : [{ type: String, ref: 'Document' }],
+    published        : [{ type: String, ref: 'Document' }],
+    unlisted         : [{ type: String, ref: 'Document' }],
     local            : {
-        email        : String,
         password     : String,
     },
     facebook         : {

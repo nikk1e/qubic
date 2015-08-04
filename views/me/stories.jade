@@ -1,16 +1,28 @@
-h1 Your models
+extends layout
 
-ul
-  li
-    a(href="drafts") Drafts
-  li
-    a(href="public") Public
-  li
-    a(href="unlisted") Unlisted
-
-if (stories.length > 0)
-  each story in stories
-    p Model description here.
-else
-  block excuse
-    p No models found.
+block content
+  h1 Your models
+  
+  ul
+    li
+      a(href="drafts")
+        | Drafts
+        if (user.drafts.length > 0)
+          span.count= user.drafts.length
+    li
+      a(href="public")
+        | Public
+        if (user.published.length > 0)
+          span.count= user.published.length
+    li
+      a(href="unlisted")
+        | Unlisted
+        if (user.unlisted.length > 0)
+          span.count= user.unlisted.length
+  
+  if (stories.length > 0)
+    each story in stories
+      p Model description here.
+  else
+    block excuse
+      p No models found.

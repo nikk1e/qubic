@@ -8,7 +8,7 @@ var collectionSchema = mongoose.Schema({
 	hidden:       Boolean, //private
 	owners:       [String], //Store these on the User
 	writers:      [String],
-	readers:      [String]
+	readers:      [String],
 });
 
 collectionSchema.index({title: 'text', description: 'text'},{
@@ -17,4 +17,4 @@ collectionSchema.index({title: 'text', description: 'text'},{
 	}
 });
 
-module.exports = mongoose.model('collection', collectionSchema);
+module.exports = mongoose.model('Collection', collectionSchema);
