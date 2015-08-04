@@ -1,8 +1,5 @@
 extends layout
 
-block vars
-  - var bodyClass = 'signup-page access-page has-full-screen-bg';
-
 block content
     .upper-wrapper
       // ******HEADER******
@@ -45,30 +42,35 @@ block content
                         | Already have an account? 
                         a#login-link.login-link(href='/login') Log in
                   // //form-container
+                if auth.social
                   .social-btns.col-md-5.col-sm-12.col-xs-12.col-md-offset-1.col-sm-offset-0.col-sm-offset-0
                     .divider
                       span Or
                     |                       
                     |                                     
                     ul.list-unstyled.social-login
-                      li
-                        a.twitter-btn.btn(href='/auth/twitter')
-                          i.fa.fa-twitter
-                          | Sign up with Twitter
-                      |                                         
-                      li
-                        a.facebook-btn.btn(href='/auth/facebook')
-                          i.fa.fa-facebook
-                          | Sign up with Facebook
-                      |                                         
-                      li
-                        a.github-btn.btn(href='/auth/github')
-                          i.fa.fa-github-alt
-                          | Sign up with Github
-                      |                                         
-                      li
-                        a.google-btn.btn(href='/auth/google')
-                          i.fa.fa-google-plus
-                          | Sign up with Google
+                      if auth.twitter
+                        li
+                          a.twitter-btn.btn(href='/auth/twitter')
+                            i.fa.fa-twitter
+                            | Sign up with Twitter
+                        |
+                      if auth.facebook
+                        li
+                          a.facebook-btn.btn(href='/auth/facebook')
+                            i.fa.fa-facebook
+                            | Sign up with Facebook
+                        |
+                      if auth.github
+                        li
+                          a.github-btn.btn(href='/auth/github')
+                            i.fa.fa-github-alt
+                            | Sign up with Github
+                        |
+                      if auth.google
+                        li
+                          a.google-btn.btn(href='/auth/google')
+                            i.fa.fa-google-plus
+                            | Sign up with Google
                     |                                     
                     p.note Don&apos;t worry, we won&apos;t post anything without your permission.

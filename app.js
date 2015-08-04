@@ -19,9 +19,13 @@ var mongoose     = require('mongoose');
 var passport     = require('passport');
 var flash        = require('connect-flash');
 
-require('./config/passport')(passport);
+var auth         = require('./config/passport');
+auth(passport);
+//auth.config;
 
 var app = express();
+
+app.locals.auth = auth.config;
 
 var ot = require('ot-sexpr');
 var sharejs = require('share');
@@ -53,6 +57,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use("/fonts", express.static("node_modules/font-awesome"));
 
 // required for passport
 var session_secret = process.env.QUBE_SESSION_SECRET ||

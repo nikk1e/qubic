@@ -8,11 +8,11 @@ var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
 // load up the user model
 var User       = require('../models/user');
 
-// load the auth variables from environment
+// load the auth variables from environmen
 var configAuth = {};
 
 if (process.env.TWITTER_KEY) {
-    configAuth.twitterAuth = {
+    configAuth.twitter = {
         consumerKey: process.env.TWITTER_KEY,
         consumerSecret:  process.env.TWITTER_SECRET,
         callbackURL: ""
@@ -20,7 +20,7 @@ if (process.env.TWITTER_KEY) {
 }
 
 if (process.env.FACEBOOK_ID) {
-    configAuth.facebookAuth = {
+    configAuth.facebook = {
         clientID: process.env.FACEBOOK_ID,
         clientSecret: process.env.FACEBOOK_SECRET,
         callbackURL: ""
@@ -28,7 +28,7 @@ if (process.env.FACEBOOK_ID) {
 }
 
 if (process.env.GOOGLE_ID) {
-    configAuth.googleAuth = {
+    configAuth.google = {
         clientID: process.env.GOOGLE_ID,
         clientSecret: process.env.GOOGLE_SECRET,
         callbackURL: ""
@@ -36,12 +36,17 @@ if (process.env.GOOGLE_ID) {
 }
 
 if (process.env.GITHUB_ID) {
-    configAuth.githubAuth = {
+    configAuth.github = {
         clientID: process.env.GITHUB_ID,
         clientSecret: process.env.GITHUB_SECRET,
         callbackURL: ""
     };
 }
+
+configAuth.social = configAuth.github ||
+    configAuth.google ||
+    configAuth.facebook ||
+    configAuth.twitter;
 
 module.exports = function(passport) {
 
@@ -175,12 +180,12 @@ module.exports = function(passport) {
     // =========================================================================
     // FACEBOOK ================================================================
     // =========================================================================
-    if (configAuth.facebookAuth) {
+    if (configAuth.facebook) {
         passport.use(new FacebookStrategy({
     
-            clientID        : configAuth.facebookAuth.clientID,
-            clientSecret    : configAuth.facebookAuth.clientSecret,
-            callbackURL     : configAuth.facebookAuth.callbackURL,
+            clientID        : configAuth.facebook.clientID,
+            clientSecret    : configAuth.facebook.clientSecret,
+            callbackURL     : configAuth.facebook.callbackURL,
             passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     
         },
@@ -256,12 +261,12 @@ module.exports = function(passport) {
     // =========================================================================
     // TWITTER =================================================================
     // =========================================================================
-    if (configAuth.twitterAuth) {
+    if (configAuth.twitter) {
         passport.use(new TwitterStrategy({
     
-            consumerKey     : configAuth.twitterAuth.consumerKey,
-            consumerSecret  : configAuth.twitterAuth.consumerSecret,
-            callbackURL     : configAuth.twitterAuth.callbackURL,
+            consumerKey     : configAuth.twitter.consumerKey,
+            consumerSecret  : configAuth.twitter.consumerSecret,
+            callbackURL     : configAuth.twitter.callbackURL,
             passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     
         },
@@ -336,12 +341,12 @@ module.exports = function(passport) {
     // =========================================================================
     // GITHUB  =================================================================
     // =========================================================================
-    if (configAuth.githubAuth) {
+    if (configAuth.github) {
         passport.use(new GithubStrategy({
     
-            clientID     : configAuth.githubAuth.clientID,
-            clientSecret  : configAuth.githubAuth.clientSecret,
-            callbackURL     : configAuth.githubAuth.callbackURL,
+            clientID     : configAuth.github.clientID,
+            clientSecret  : configAuth.github.clientSecret,
+            callbackURL     : configAuth.github.callbackURL,
             passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     
         },
@@ -419,12 +424,12 @@ module.exports = function(passport) {
     // =========================================================================
     // GOOGLE ==================================================================
     // =========================================================================
-    if (configAuth.googleAuth) {
+    if (configAuth.google) {
         passport.use(new GoogleStrategy({
     
-            clientID        : configAuth.googleAuth.clientID,
-            clientSecret    : configAuth.googleAuth.clientSecret,
-            callbackURL     : configAuth.googleAuth.callbackURL,
+            clientID        : configAuth.google.clientID,
+            clientSecret    : configAuth.google.clientSecret,
+            callbackURL     : configAuth.google.callbackURL,
             passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     
         },
@@ -495,6 +500,7 @@ module.exports = function(passport) {
             });
     
         }));
+    }
 };
 
 module.exports.config = configAuth;
