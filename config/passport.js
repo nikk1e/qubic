@@ -8,9 +8,40 @@ var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
 // load up the user model
 var User       = require('../models/user');
 
-// load the auth variables
-//TODO: configure Auth in the environment variables.
-var configAuth = {}; //require('./auth');
+// load the auth variables from environment
+var configAuth = {};
+
+if (process.env.TWITTER_KEY) {
+    configAuth.twitterAuth = {
+        consumerKey: process.env.TWITTER_KEY,
+        consumerSecret:  process.env.TWITTER_SECRET,
+        callbackURL: ""
+    };
+}
+
+if (process.env.FACEBOOK_ID) {
+    configAuth.facebookAuth = {
+        clientID: process.env.FACEBOOK_ID,
+        clientSecret: process.env.FACEBOOK_SECRET,
+        callbackURL: ""
+    };
+}
+
+if (process.env.GOOGLE_ID) {
+    configAuth.googleAuth = {
+        clientID: process.env.GOOGLE_ID,
+        clientSecret: process.env.GOOGLE_SECRET,
+        callbackURL: ""
+    };
+}
+
+if (process.env.GITHUB_ID) {
+    configAuth.githubAuth = {
+        clientID: process.env.GITHUB_ID,
+        clientSecret: process.env.GITHUB_SECRET,
+        callbackURL: ""
+    };
+}
 
 module.exports = function(passport) {
 
@@ -464,6 +495,6 @@ module.exports = function(passport) {
             });
     
         }));
-    }
-
 };
+
+module.exports.config = configAuth;
