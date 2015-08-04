@@ -6,79 +6,134 @@ block content
     p #{req.protocol}://#{req.headers.host}/@#{user.name}
     h3 Your email
     p #{user.email}
-          if auth.social
-            .row
-              h3.text-center
-                | Social animal? Connect your Qubic profile to the world.
-            .row
-              if auth.facebook
-                .col-sm-6.col-xs-12
-                  .well
-                    h3
-                      span.fa.fa-facebook
-                      |  Facebook
-                    if user.facebook.token
-                      p
-                        strong email
-                        |: #{user.facebook.email}
-                        br
-                        strong name
-                        |: #{user.facebook.name}
-                        br
-                      a.btn.btn-default(href='/unlink/facebook') Unlink
-                    else
-                      a.btn.btn-default(href='/connect/facebook') Connect   Facebook
-              if auth.github
-                .col-sm-6.col-xs-12
-                  .well
-                    h3
-                      span.fa.fa-github
-                      |  Github
-                    if user.github.token
-                      p
-                        strong username
-                        |: #{user.github.username}
-                        br
-                        if user.github.email
-                          strong email
-                          |: #{user.github.email}
-                          br
-                        strong name
-                        |: #{user.github.displayName}
-                        br
-                      a.btn.btn-default(href='/unlink/github') Unlink
-                    else
-                      a.btn.btn-default(href='/connect/github') Connect   Github
-            .row
-                .col-sm-6.col-xs-12
-                  .well
-                    h3
-                      span.fa.fa-twitter
-                      |  Twitter
-                    if user.twitter.token
-                      p
-                        strong username
-                        |: #{user.twitter.username}
-                        br
-                        strong name
-                        |: #{user.twitter.displayName}
-                        br
-                      a.btn.btn-default(href='/unlink/twitter') Unlink
-                    else
-                      a.btn.btn-default(href='/connect/twitter') Connect  Twitter
-                .col-sm-6.col-xs-12
-                  .well
-                    h3
-                      span.fa.fa-google
-                      |  Google
-                    if user.google.token
-                      p
-                        strong email
-                        |: #{user.google.email}
-                        br
-                        strong name
-                        |: #{user.google.name}
-                        br
-                      a.btn.btn-default(href='/unlink/google') Unlink
-                    else
-                      a.btn.btn-default(href='/connect/google') Connect Google
+      if auth.social
+        .row
+          h3.text-center
+            | Connect
+          if auth.ad
+            h3
+              span.fa.fa-windows
+              |  Active Directory
+            if user.ad.id
+              p
+                strong username
+                |: #{user.ad.domain + '\\' + user.ad.name}
+          if auth.facebook
+            .col-sm-6.col-xs-12
+              .well
+                h3
+                  span.fa.fa-facebook
+                  |  Facebook
+                if user.facebook.token
+                  p
+                    strong email
+                    |: #{user.facebook.email}
+                    br
+                    strong name
+                    |: #{user.facebook.name}
+                    br
+                  a.btn.btn-default(href='/unlink/facebook') Unlink
+                else
+                  a.btn.btn-default(href='/connect/facebook') Connect   Facebook
+          if auth.github
+            .col-sm-6.col-xs-12
+              .well
+                h3
+                  span.fa.fa-github
+                  |  Github
+                if user.github.token
+                  p
+                    strong username
+                    |: #{user.github.username}
+                    br
+                    if user.github.email
+                      strong email
+                      |: #{user.github.email}
+                      br
+                    strong name
+                    |: #{user.github.displayName}
+                    br
+                  a.btn.btn-default(href='/unlink/github') Unlink
+                else
+                  a.btn.btn-default(href='/connect/github') Connect   Github
+          if auth.twitter
+                h3
+                  span.fa.fa-twitter
+                  |  Twitter
+                if user.twitter.token
+                  p
+                    strong username
+                    |: #{user.twitter.username}
+                    br
+                    strong name
+                    |: #{user.twitter.displayName}
+                    br
+                  a.btn.btn-default(href='/unlink/twitter') Unlink
+                else
+                  a.btn.btn-default(href='/connect/twitter') Connect  Twitter
+          if auth.google
+              .well
+                h3
+                  span.fa.fa-google
+                  |  Google
+                if user.google.token
+                  p
+                    strong email
+                    |: #{user.google.email}
+                    br
+                    strong name
+                    |: #{user.google.name}
+                    br
+                  a.btn.btn-default(href='/unlink/google') Unlink
+                else
+                  a.btn.btn-default(href='/connect/google') Connect Google
+  h2 Keys
+  h3 Public
+  each key in user.public_keys
+    p= key.description
+    p= key.fingerprint
+  h3 Private
+  each key in user.private_keys
+    p= key.description
+    p= key.fingerprint
+  form#key-form(action='keys',method='post')
+    .form-group.title
+      label.sr-only(for='key-title') Title
+      input#key-title.form-control.key-title(type='text',placeholder='Title', name='description')
+    .form-group.key
+      label.sr-only(for='key-key') Key         
+      textarea#key-key.form-control.key-key(placeholder='PGP ascii armored key', name='key')
+    .form-group.passphrase
+      label.sr-only(for='key-passphrase') Passphrase         
+      input#key-passphrase.form-control.key-passphrase(type='password',placeholder='Passphrase', name='passphrase')
+    input#key-user(type='hidden', name='user', value="#{user.name} <#{user.email}>")
+    a#generateKey.btn.btn-block.btn-cta-primary(href='#generate') Generate Key
+    button.btn.btn-block.btn-cta-primary(type='submit') Add Key
+
+  script(type='text/javascript' src='/pgp/openpgp.js')
+  script.
+    openpgp.initWorker('/pgp/openpgp.worker.js')
+    console.error = console.log
+    function generateKey() {
+      var form = document.getElementById('key-form');
+      if (form.elements['passphrase'].value.length < 3) {
+        //set some validation here.
+        return false;
+      }
+      var options = {
+        numBits: 2048,
+        userId: form.elements['user'].value,
+        passphrase: form.elements['passphrase'].value
+      };
+      openpgp.generateKeyPair(options).then(function(keypair) {
+        var privkey = keypair.privateKeyArmored;
+        form.elements['key'].value = privkey;
+        console.log(privkey);
+      }).catch(function(error) {
+        // failure
+        console.log(error)
+      });
+      form.elements['passphrase'].value = ''; //clear passphrase
+      return false;
+    }
+    document.getElementById('generateKey').onclick=generateKey;

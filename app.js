@@ -62,6 +62,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/fonts", express.static("node_modules/font-awesome"));
+app.use("/pgp", express.static("node_modules/openpgp/dist"));
 if (AD_CONTROLLER) app.use(ntlm({ domaincontroller: AD_CONTROLLER }));
 
 // required for passport

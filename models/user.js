@@ -3,8 +3,14 @@ var mongoose = require('mongoose')
   , Schema   = mongoose.Schema;
 var bcrypt   = require('bcrypt-nodejs');
 
+var Key = Schema({
+    description: String,
+    fingerprint: String,
+    key: String,
+});
+
 // define the schema for our user model
-var userSchema = mongoose.Schema({
+var userSchema = Schema({
     //TODO: generate this based on first login
     name             : { type: String, index: { unique: true }},
     email            : String,
@@ -16,6 +22,8 @@ var userSchema = mongoose.Schema({
     drafts           : [{ type: String, ref: 'Document' }],
     published        : [{ type: String, ref: 'Document' }],
     unlisted         : [{ type: String, ref: 'Document' }],
+    public_keys      : [Key], //first is default
+    private_keys     : [Key], //first is default
     local            : {
         password     : String,
     },
@@ -66,3 +74,4 @@ userSchema.methods.validPassword = function(password) {
 
 // create the model for users and expose it to our app
 module.exports = mongoose.model('User', userSchema);
+module.exports.Key = mongoose.model('Key', Key);

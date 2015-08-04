@@ -50,6 +50,7 @@ if (process.env.AD_CONTROLLER)
 configAuth.social = configAuth.github ||
     configAuth.google ||
     configAuth.facebook ||
+    configAuth.ad ||
     configAuth.twitter;
 
 module.exports = function(passport) {

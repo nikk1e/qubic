@@ -44,4 +44,38 @@ router.get('/collections', function(req, res, next) {
   res.render('me/collections', {});
 });
 
+// keys ---
+
+router.post('/keys', function(req, res) {
+  var user = req.user;
+  var openpgp = require('openpgp');
+  var ascii = req.body.key;
+  var desc = req.body.description
+  var key = openpgp.key.readArmored(ascii).keys[0];
+  var pubkey = new User.Key();
+  if (key.isPrivate()) {
+    var pk = new User.Key();
+    pk.description = desc;
+    pk.key = ascii;
+    pk.fingerprint = key.primaryKey.keyid.toHex();
+    if (!user.private_keys)
+      user.private_keys = [];
+    user.private_keys.unshift(pk);
+    //public key
+    key = key.toPublic();
+    ascii = key.armor()
+  }
+  pubkey.description = desc;
+  pubkey.key = ascii;
+  pubkey.fingerprint = key.primaryKey.keyid.toHex();
+  if (!user.public_keys)
+    user.public_keys = [];
+  user.public_keys.unshift(pubkey);
+  user.save(function (err) {
+    if (err)
+      res.send(err);                 
+    res.redirect('settings')
+  });
+});
+
 module.exports = router;
