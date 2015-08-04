@@ -1,5 +1,6 @@
-var Collection       = require('../models/collection');
-var User             = require('../models/user');
+var Collection = require('../models/collection');
+var Document   = require('../models/document');
+var User       = require('../models/user');
 
 module.exports = function(app, passport) {
 
@@ -7,10 +8,11 @@ module.exports = function(app, passport) {
 
 	// show the home page (will also have our login links)
 	app.get('/', function(req, res) {
-		if (req.isAuthenticated())
-			return res.render('profile', { //TODO: do not render profile
-				user : req.user
-			});
+		if (req.isAuthenticated()) {
+			//load users relevant stories (follows)
+		} else {
+			//load stories from highlights collection
+		}
 		res.render('index');
 	});
 
@@ -288,10 +290,17 @@ module.exports = function(app, passport) {
   		});
 	});
 
-	app.get('/@:name', function(req, res) {
-		res.render('profile', {
-			user : req.collection
-		});
+	app.get('/@:name', function(req, res, next) {
+		Document.find({
+  			'catalog':('@' + req.collection.name),
+  			'hidden':false //public
+  		}, function(err, docs){
+  			if (err) return next(err);
+    		res.render('profile', {
+				user: req.collection,
+				stories: (docs || []),
+			});
+  		});
 	});
 
 	app.param('collection', function(req, res, next, name) {
@@ -308,7 +317,16 @@ module.exports = function(app, passport) {
 	});
 
 	app.get('/:collection', function(req, res) {
-		res.send(req.collection);
+		Document.find({
+  			'catalog':req.collection.name,
+  			'hidden':false //public
+  		}, function(err, docs){
+  			if (err) return next(err);
+    		res.render('collection', {
+				collection: req.collection,
+				stories: (docs || []),
+			});
+  		});
 	});
 
 };

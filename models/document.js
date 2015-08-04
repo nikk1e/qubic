@@ -8,7 +8,7 @@ in one and only one collection.
 */
 var documentSchema = mongoose.Schema({
 	_id : String,
-	catalog: String, //collection or @username
+	catalog: String, //collection.name or @user.name
 	title: String,
 	slug: String,
 	text: String,
