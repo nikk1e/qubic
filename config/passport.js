@@ -4,6 +4,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 var GithubStrategy   = require('passport-github').Strategy;
 var GoogleStrategy   = require('passport-google-oauth').OAuth2Strategy;
+var CustomStrategy   = require('passport-custom').Strategy;
 
 // load up the user model
 var User       = require('../models/user');
@@ -42,6 +43,9 @@ if (process.env.GITHUB_ID) {
         callbackURL: ""
     };
 }
+
+if (process.env.AD_CONTROLLER)
+    configAuth.ad = true;
 
 configAuth.social = configAuth.github ||
     configAuth.google ||
@@ -176,6 +180,66 @@ module.exports = function(passport) {
         });
 
     }));
+
+    // =========================================================================
+    // Active Directory ========================================================
+    // =========================================================================
+    if (configAuth.ad) {
+        passport.use('ad', new CustomStrategy(
+            function(req, done) {
+
+            if (req.ntlm==undefined)
+                return done(null, false,
+                    req.flash('loginMessage', 'AD authentication failed.'));
+
+            // asynchronous
+            process.nextTick(function() {
+                var id = req.ntlm.DomainName + '/' + req.ntlm.UserName;
+                // check if the user is already logged in
+                if (!req.user) {
+
+                    User.findOne({ 'ad.id' : id }, function(err, user) {
+                        if (err)
+                            return done(err);
+
+                        if (user) {
+                            return done(null, user);
+                        } else {
+                            // if there is no user, create them
+                            var newUser       = new User();
+                            newUser.name      = req.ntlm.UserName.toLowerCase();
+                            newUser.ad.id     = id;
+                            newUser.ad.name   = req.ntlm.UserName;
+                            newUser.ad.domain = req.ntlm.DomainName;
+
+                            newUser.save(function(err) {
+                                if (err)
+                                    return done(err);
+
+                                return done(null, newUser);
+                            });
+                        }
+                    });
+                } else {
+                    // user already exists and is logged in, we have to link accounts
+                    var user            = req.user; // pull the user out of the session
+
+                    user.ad.id     = id;
+                    user.ad.name   = req.ntlm.UserName;
+                    user.ad.domain = req.ntlm.DomainName;
+
+                    user.save(function(err) {
+                        if (err)
+                            return done(err);
+
+                        return done(null, user);
+                    });
+
+                }
+            });
+
+        }));
+    }
 
     // =========================================================================
     // FACEBOOK ================================================================

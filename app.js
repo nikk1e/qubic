@@ -19,6 +19,8 @@ var mongoose     = require('mongoose');
 var passport     = require('passport');
 var flash        = require('connect-flash');
 
+var ntlm         = require('express-ntlm');
+
 var auth         = require('./config/passport');
 auth(passport);
 //auth.config;
@@ -32,7 +34,9 @@ var sharejs = require('share');
 
 livedb.ot.registerType(ot);
 
-var MONGODB_URL = 'mongodb://localhost:27017/qube?auto_reconnect'
+var MONGODB_URL = process.env.MONGODB_URL ||
+  'mongodb://localhost:27017/qube?auto_reconnect';
+var AD_CONTROLLER = process.env.AD_CONTROLLER;
 
 //we have two connections to mongodb
 mongoose.connect(MONGODB_URL);
@@ -58,6 +62,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/fonts", express.static("node_modules/font-awesome"));
+if (AD_CONTROLLER) app.use(ntlm({ domaincontroller: AD_CONTROLLER }));
 
 // required for passport
 var session_secret = process.env.QUBE_SESSION_SECRET ||

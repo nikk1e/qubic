@@ -40,6 +40,11 @@ var userSchema = mongoose.Schema({
         token        : String,
         email        : String,
         name         : String
+    },
+    ad               : {
+        id           : String,
+        name         : String,
+        domain       : String
     }
 
 });

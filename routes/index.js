@@ -77,7 +77,7 @@ module.exports = function(app, passport) {
 
 		// process the login form
 		app.post('/login', passport.authenticate('local-login', {
-			successRedirect : '/', // redirect to the secure profile section
+			successReturnToOrRedirect : '/', // redirect to the secure profile section
 			failureRedirect : '/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
@@ -90,9 +90,16 @@ module.exports = function(app, passport) {
 
 		// process the signup form
 		app.post('/signup', passport.authenticate('local-signup', {
-			successRedirect : '/me', // redirect to the secure profile section
+			successReturnToOrRedirect : '/me', // redirect to the secure profile section
 			failureRedirect : '/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
+		}));
+
+	// active directory ------------
+
+		app.get('/auth/ad', passport.authenticate('ad', {
+			successReturnToOrRedirect : '/me',
+			failureRedirect : '/'
 		}));
 
 	// facebook -------------------------------
@@ -103,7 +110,7 @@ module.exports = function(app, passport) {
 		// handle the callback after facebook has authenticated the user
 		app.get('/auth/facebook/callback',
 			passport.authenticate('facebook', {
-				successRedirect : '/me',
+				successReturnToOrRedirect : '/me',
 				failureRedirect : '/'
 			}));
 
@@ -115,7 +122,7 @@ module.exports = function(app, passport) {
 		// handle the callback after twitter has authenticated the user
 		app.get('/auth/twitter/callback',
 			passport.authenticate('twitter', {
-				successRedirect : '/me',
+				successReturnToOrRedirect : '/me',
 				failureRedirect : '/'
 			}));
 
@@ -127,7 +134,7 @@ module.exports = function(app, passport) {
 		// handle the callback after github has authenticated the user
 		app.get('/auth/github/callback',
 			passport.authenticate('github', {
-				successRedirect : '/me',
+				successReturnToOrRedirect : '/me',
 				failureRedirect : '/'
 			}));
 
@@ -140,7 +147,7 @@ module.exports = function(app, passport) {
 		// the callback after google has authenticated the user
 		app.get('/auth/google/callback',
 			passport.authenticate('google', {
-				successRedirect : '/me',
+				successReturnToOrRedirect : '/me',
 				failureRedirect : '/'
 			}));
 
@@ -258,5 +265,12 @@ function isLoggedIn(req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 
-	res.redirect('/');
+	if (req.session)
+		req.session.returnTo = req.originalUrl || req.url;
+
+	//if we have active directory we use that.
+	if (req.ntlm)
+		res.redirect('/auth/ad');
+	else
+		res.redirect('/loign');
 }
