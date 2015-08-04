@@ -72,7 +72,12 @@ module.exports = function(app, passport) {
 		// LOGIN ===============================
 		// show the login form
 		app.get('/login', function(req, res) {
-			res.render('login', { message: req.flash('loginMessage') });
+			if (req.ntlm)
+				res.redirect('/auth/ad');
+			else
+				res.render('login', {
+					message: req.flash('loginMessage'),
+				});
 		});
 
 		// process the login form
@@ -272,5 +277,6 @@ function isLoggedIn(req, res, next) {
 	if (req.ntlm)
 		res.redirect('/auth/ad');
 	else
-		res.redirect('/loign');
+		res.redirect('/login');
 }
+

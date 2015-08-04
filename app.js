@@ -71,6 +71,16 @@ app.use(session({ secret: session_secret }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash());
+
+if (AD_CONTROLLER) {
+  app.all('*', passport.authenticate('ad'), function(req, res, next){
+    if(req.isAuthenticated())
+      next();
+    else
+      next(new Error(401)); // 401 Not Authorized
+  });
+}
+
 //allow req access from templates
 app.use(function(req,res,next){
     res.locals.req = req;
@@ -170,4 +180,5 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
+
 

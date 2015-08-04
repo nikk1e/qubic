@@ -188,13 +188,13 @@ module.exports = function(passport) {
         passport.use('ad', new CustomStrategy(
             function(req, done) {
 
-            if (req.ntlm==undefined)
+            if (req.ntlm==undefined || req.ntlm.UserName==='')
                 return done(null, false,
                     req.flash('loginMessage', 'AD authentication failed.'));
 
             // asynchronous
             process.nextTick(function() {
-                var id = req.ntlm.DomainName + '/' + req.ntlm.UserName;
+                var id = (req.ntlm.DomainName + '\\' + req.ntlm.UserName).toLowerCase();
                 // check if the user is already logged in
                 if (!req.user) {
 
@@ -567,4 +567,4 @@ module.exports = function(passport) {
     }
 };
 
-module.exports.config = configAuth;
+module.exports.config = configAuth;
