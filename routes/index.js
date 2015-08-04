@@ -1,4 +1,5 @@
 var Collection       = require('../models/collection');
+var User             = require('../models/user');
 
 module.exports = function(app, passport) {
 
@@ -261,6 +262,53 @@ module.exports = function(app, passport) {
 		user.save(function(err) {
 			res.redirect('/me/settings');
 		});
+	});
+
+
+	// collections -------
+
+	app.get('/new-collection', isLoggedIn, function(req, res) {
+		res.render('new-collection');
+	});
+
+	app.get('/search', isLoggedIn, function(req, res) {
+		res.render('search');
+	});
+
+	app.param('name', function(req, res, next, name) {
+		User.findOne({ 'name' :  name }, function(err, user) {
+    		if (err) {
+      			next(err);
+    		} else if (user) {
+      			req.collection = user;
+      			next();
+    		} else {
+      			next(new Error('failed to load user'));
+    		}
+  		});
+	});
+
+	app.get('/@:name', function(req, res) {
+		res.render('profile', {
+			user : req.collection
+		});
+	});
+
+	app.param('collection', function(req, res, next, name) {
+		Collection.findOne({ 'name' :  name }, function(err, collection) {
+    		if (err) {
+      			next(err);
+    		} else if (collection) {
+      			req.collection = collection;
+      			next();
+    		} else {
+      			next(new Error('failed to load collection'));
+    		}
+  		});
+	});
+
+	app.get('/:collection', function(req, res) {
+		res.send(req.collection);
 	});
 
 };

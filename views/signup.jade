@@ -24,6 +24,9 @@ block content
                 .row
                   .form-container.col-md-5.col-sm-12.col-xs-12
                     form.signup-form(action='/signup',method='post')
+                      .form-group.name
+                        label.sr-only(for='signup-name') Your username
+                        input#signup-name.form-control.login-name(placeholder='Your username', name='name')
                       .form-group.email
                         label.sr-only(for='signup-email') Your email
                         |                                             
@@ -54,23 +57,19 @@ block content
                           a.twitter-btn.btn(href='/auth/twitter')
                             i.fa.fa-twitter
                             | Sign up with Twitter
-                        |
                       if auth.facebook
                         li
                           a.facebook-btn.btn(href='/auth/facebook')
                             i.fa.fa-facebook
                             | Sign up with Facebook
-                        |
                       if auth.github
                         li
                           a.github-btn.btn(href='/auth/github')
                             i.fa.fa-github-alt
                             | Sign up with Github
-                        |
                       if auth.google
                         li
                           a.google-btn.btn(href='/auth/google')
                             i.fa.fa-google-plus
                             | Sign up with Google
-                    |                                     
                     p.note Don&apos;t worry, we won&apos;t post anything without your permission.

@@ -143,9 +143,27 @@ app.use(function(req,res,next){
     next();
 });
 
-require('./routes/index')(app, passport);
+//TODO: put this in utils
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated())
+    return next();
+
+  if (req.session)
+    req.session.returnTo = req.originalUrl || req.url;
+
+  //if we have active directory we use that.
+  if (req.ntlm)
+    res.redirect('/auth/ad');
+  else
+    res.redirect('/login');
+}
+
 var admin = require('./routes/admin');
+var me = require('./routes/me');
 app.use('/admin', admin);
+app.use('/me', isLoggedIn, me);
+require('./routes/index')(app, passport);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

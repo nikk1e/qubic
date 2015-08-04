@@ -87,7 +87,7 @@ module.exports = function(passport) {
 
         // asynchronous
         process.nextTick(function() {
-            User.findOne({ 'local.email' :  email }, function(err, user) {
+            User.findOne({$or:[{'local.email':email},{'name':email}]}, function(err, user) {
                 // if there are any errors, return the error
                 if (err)
                     return done(err);
@@ -137,6 +137,7 @@ module.exports = function(passport) {
                         // create the user
                         var newUser            = new User();
 
+                        newUser.name           = (req.body.name || 'unknown').toLowerCase();
                         newUser.local.email    = email;
                         newUser.local.password = newUser.generateHash(password);
 
@@ -567,4 +568,4 @@ module.exports = function(passport) {
     }
 };
 
-module.exports.config = configAuth;
+module.exports.config = configAuth;
