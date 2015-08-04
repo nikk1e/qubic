@@ -1,3 +1,5 @@
+var Collection       = require('../models/collection');
+
 module.exports = function(app, passport) {
 
 // normal routes ===============================================================

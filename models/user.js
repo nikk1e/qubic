@@ -9,6 +9,9 @@ var userSchema = mongoose.Schema({
     email            : String,
     displayName      : String, //Set to same as name initially
     bio              : String,
+    writer           : [String],
+    owner            : [String],
+    reader           : [String],
     local            : {
         email        : String,
         password     : String,
@@ -41,7 +44,7 @@ var userSchema = mongoose.Schema({
 
 });
 
-userSchema.index({displayName: 'text', bio: 'text'});
+userSchema.index({displayName: 'text', bio: 'text', name: 'text'});
 
 // generating a hash
 userSchema.methods.generateHash = function(password) {

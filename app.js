@@ -36,34 +36,11 @@ var db = livedbMongo(MONGODB_URL, {safe:false});
 var backend = livedb.client(db);
 var share = sharejs.server.createClient({backend: backend});
 
-app.use(Socket(function(client) {
-  var stream = new Duplex({objectMode: true});
 
-  stream._read = function() {};
-  stream._write = function(chunk, encoding, callback) {
-    if (client.state !== 'closed') {
-      client.send(chunk);
-    }
-    callback();
-  };
-
-  client.on('message', function(data) {
-    console.log(JSON.stringify(data))
-    stream.push(data);
-  });
-
-  client.on('close', function(reason) {
-    stream.push(null);
-    stream.emit('close');
-  });
-
-  stream.on('end', function() {
-    client.close();
-  });
-
-  // Give the stream to sharejs
-  return share.listen(stream);
-}));
+share.use(function(req, next) {
+  //TODO: op filter for share docs here
+  next();
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -90,6 +67,40 @@ app.use(function(req,res,next){
     res.locals.user = req.user;
     next();
 });
+
+//sharejs websocket hookup
+app.use(Socket(function(client, req) {
+  if (req.user) {
+    client.user = req.user;
+  }
+  
+  var stream = new Duplex({objectMode: true});
+
+  stream._read = function() {};
+  stream._write = function(chunk, encoding, callback) {
+    if (client.state !== 'closed') {
+      client.send(chunk);
+    }
+    callback();
+  };
+
+  client.on('message', function(data) {
+    console.log(JSON.stringify(data))
+    stream.push(data);
+  });
+
+  client.on('close', function(reason) {
+    stream.push(null);
+    stream.emit('close');
+  });
+
+  stream.on('end', function() {
+    client.close();
+  });
+
+  // Give the stream to sharejs
+  return share.listen(stream, client);
+}));
 
 // provide rack for ids (new rack every 2 hours)
 var MILLISECONDS_PER_RACK = 1000 * 60 * 60 * 2;
@@ -149,3 +160,4 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
+
