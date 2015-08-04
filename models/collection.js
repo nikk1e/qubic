@@ -17,4 +17,4 @@ collectionSchema.index({title: 'text', description: 'text'},{
 	}
 });
 
-module.exports = mongoose.model('Collection', collectionSchema);
+module.exports = mongoose.model('collection', collectionSchema);

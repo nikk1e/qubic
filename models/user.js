@@ -12,6 +12,7 @@ var userSchema = mongoose.Schema({
     writer           : [String],
     owner            : [String],
     reader           : [String],
+    following        : [String],
     local            : {
         email        : String,
         password     : String,

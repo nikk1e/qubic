@@ -8,7 +8,7 @@ in one and only one collection.
 */
 var documentSchema = mongoose.Schema({
 	_id : String,
-	collection: String, //or @username
+	catalog: String, //collection or @username
 	title: String,
 	slug: String,
 	text: String,
@@ -17,7 +17,7 @@ var documentSchema = mongoose.Schema({
 	hidden: Boolean //unlisted
 });
 
-documentSchema.index({collection: 1, 
+documentSchema.index({catalog: 1, 
 	title: 'text', 
 	text: 'text', 
 	slug: 'text'
@@ -28,6 +28,6 @@ documentSchema.index({collection: 1,
 		//text: 1
 	}
 });
-documentSchema.index({collection: 1});
+documentSchema.index({catalog: 1, hidden: 1});
 
 module.exports = mongoose.model('Document', documentSchema);
