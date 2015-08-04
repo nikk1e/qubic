@@ -5,4 +5,9 @@ block header
   include ./includes/header.jade
 
 block content
-  h1 New Collection (TODO)
+  h1 New Collection
+  form(method='post')
+    input(name='name', placeholder='Name',value="#{collection.name}")
+    input(name='title', placeholder='Title',value="#{collection.title}")
+    textarea(name='description', placeholder='Description',value="#{collection.description}")
+    button(type='submit') Create

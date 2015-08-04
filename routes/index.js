@@ -270,7 +270,24 @@ module.exports = function(app, passport) {
 	// collections -------
 
 	app.get('/new-collection', isLoggedIn, function(req, res) {
-		res.render('new-collection');
+		res.render('new-collection', {collection: new Collection()});
+	});
+
+	app.post('/new-collection', isLoggedIn, function(req, res) {
+		var collection = new Collection();
+		collection.name = req.body.name.replace(' ','+');
+		collection.title = req.body.title;
+		collection.description = req.body.description;
+		collection.owners.push(req.user.name);
+		collection.save(function (err) {
+    		if (err) {
+    			req.flash('new', err);
+      			return res.render('new-collection', {
+      				collection:collection
+      			});
+    		}
+    		res.redirect(collection.name);
+  		});
 	});
 
 	app.get('/search', isLoggedIn, function(req, res) {
