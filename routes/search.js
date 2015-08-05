@@ -77,14 +77,14 @@ router.get('/collections', function(req, res, next) {
   var q = req.query.q || '';
   collections(q).then(function(ps) {
   	res.send(ps);
-  }).catch(next);
+  })
 });
 
-router.get('/doucments', function(req, res, next) {
+router.get('/documents', function(req, res, next) {
   var q = req.query.q || '';
-  doucments(q).then(function(ps) {
+  documents(q).then(function(ps) {
   	res.send(ps);
-  }).catch(next);
+  })
 });
 
 
