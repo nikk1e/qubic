@@ -6,13 +6,14 @@ var bcrypt   = require('bcrypt-nodejs');
 var Key = Schema({
     description: String,
     fingerprint: String,
+    key_id: String,
     key: String,
+    created: { type: Date, default: Date.now },
 });
 
 // define the schema for our user model
 var userSchema = Schema({
-    //TODO: generate this based on first login
-    name             : { type: String, index: { unique: true }},
+    name             : String,
     email            : String,
     displayName      : String, //Set to same as name initially
     bio              : String,
@@ -61,7 +62,7 @@ var userSchema = Schema({
 });
 
 userSchema.index({displayName: 'text', bio: 'text', name: 'text'});
-
+userSchema.index({name:1},{unique:true});
 // generating a hash
 userSchema.methods.generateHash = function(password) {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);

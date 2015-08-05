@@ -14,10 +14,11 @@ var documentSchema = mongoose.Schema({
 	text: String,
 	data: String, //snapshot
 	created: { type: Date, default: Date.now },
-	hidden: Boolean //unlisted
+	hidden: { type: Boolean, default: false } //unlisted
 });
 
-documentSchema.index({catalog: 1, 
+documentSchema.index({
+	hidden: 1,
 	title: 'text', 
 	text: 'text', 
 	slug: 'text'

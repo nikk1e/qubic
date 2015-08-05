@@ -75,6 +75,17 @@ router.get('/collections', function(req, res, next) {
 
 // keys ---
 
+//also want this on the profile/public_key
+router.get('/keys', function(req, res) {
+  res.send(req.user.public_keys);
+});
+
+//should not be accessable anywhere else 
+//(requires user authentication)
+router.get('/private_keys', function(req, res) {
+  res.send(req.user.private_keys);
+});
+
 router.post('/keys', function(req, res) {
   var user = req.user;
   var openpgp = require('openpgp');
@@ -86,7 +97,8 @@ router.post('/keys', function(req, res) {
     var pk = new User.Key();
     pk.description = desc;
     pk.key = ascii;
-    pk.fingerprint = key.primaryKey.keyid.toHex();
+    pk.key_id = key.primaryKey.keyid.toHex();
+    pk.fingerprint = key.primaryKey.getFingerprint();
     if (!user.private_keys)
       user.private_keys = [];
     user.private_keys.unshift(pk);
@@ -96,7 +108,8 @@ router.post('/keys', function(req, res) {
   }
   pubkey.description = desc;
   pubkey.key = ascii;
-  pubkey.fingerprint = key.primaryKey.keyid.toHex();
+  pubkey.key_id = key.primaryKey.keyid.toHex();
+  pubkey.fingerprint = key.primaryKey.getFingerprint();
   if (!user.public_keys)
     user.public_keys = [];
   user.public_keys.unshift(pubkey);

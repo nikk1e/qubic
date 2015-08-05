@@ -29,6 +29,8 @@ var app = express();
 
 app.locals.auth = auth.config;
 
+app.locals.moment = require('moment');
+
 var ot = require('ot-sexpr');
 var sharejs = require('share');
 
@@ -159,10 +161,9 @@ function isLoggedIn(req, res, next) {
     res.redirect('/login');
 }
 
-var admin = require('./routes/admin');
-var me = require('./routes/me');
-app.use('/admin', admin);
-app.use('/me', isLoggedIn, me);
+app.use('/admin', isLoggedIn, require('./routes/admin'));
+app.use('/me', isLoggedIn, require('./routes/me'));
+app.use('/search', require('./routes/search'))
 require('./routes/index')(app, passport);
 
 

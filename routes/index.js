@@ -294,10 +294,6 @@ module.exports = function(app, passport) {
   		});
 	});
 
-	app.get('/search', isLoggedIn, function(req, res) {
-		res.render('search');
-	});
-
 	app.param('name', function(req, res, next, name) {
 		User.findOne({ 'name' :  name }, function(err, user) {
     		if (err) {

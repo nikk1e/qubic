@@ -5,16 +5,21 @@ var collectionSchema = mongoose.Schema({
 	title:        String,
 	description:  String,
 	created:      { type: Date, default: Date.now },
-	hidden:       Boolean, //private
+	hidden:       { type: Boolean, default: false }, //private
 	owners:       [String], //Store these on the User
 	writers:      [String],
 	readers:      [String],
 });
 
-collectionSchema.index({title: 'text', description: 'text'},{
+collectionSchema.index({
+	hidden: 1,
+	title: 'text',
+	description: 'text',
+    name: 'text',
+  },{
 	weights:{
-		title:5
-	}
+	  title:5
+  }
 });
 
 module.exports = mongoose.model('Collection', collectionSchema);
