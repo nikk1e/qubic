@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "set AD_CONTROLLER=xxx&&node ./bin/www",
     "build-css": "stylus style --out public/stylesheets",
     "watch-css": "nodemon -e styl -x \"npm run build-css\"",
     "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js",
@@ -15,7 +15,9 @@
     "build": "npm run build-js & npm run build-css",
     "test": "mocha",
     "dev": "DEBUG=qube-web:* NODE_ENV=development npm run watch",
-    "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& npm run watch-win"
+    "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& set AD_CONTROLLER=xxx&& npm run watch-win",
+    "install-windows-service": "winser -i",
+    "uninstall-windows-service": "winser -r"
   },
   "author": {
     "name": "Benjamin Norrington",
@@ -54,7 +56,8 @@
     "share": "^0.7.19",
     "slate0": "git://github.com/mavxg/ot-sexpr",
     "slatejs": "git://github.com/mavxg/slatejs",
-    "stylus": "0.42.3"
+    "stylus": "0.42.3",
+    "winser": "1.0.0"
   },
   "devDependencies": {
     "browserify": "^9.0.3",
