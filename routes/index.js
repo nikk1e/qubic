@@ -270,7 +270,11 @@ module.exports = function(app, passport) {
 	// collections -------
 
 	app.get('/new-collection', isLoggedIn, function(req, res) {
-		res.render('new-collection', {collection: new Collection()});
+		var collection = new Collection();
+		collection.name = '';
+		collection.title = '';
+		collection.description = '';
+		res.render('new-collection', {collection:collection });
 	});
 
 	app.post('/new-collection', isLoggedIn, function(req, res) {

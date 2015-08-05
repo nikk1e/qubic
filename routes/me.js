@@ -40,8 +40,37 @@ router.get('/models/unlisted', function(req, res, next) {
 });
 
 router.get('/collections', function(req, res, next) {
-  //list collections I am involved in.
-  res.render('me/collections', {});
+  var user = req.user;
+  Collection.find({ $or: [
+    {owners:user.name},
+    {writers:user.name},
+    {readers:user.name},
+    {name: { $in: user.following }},
+  ]}, function(err, collections) {
+    collections = collections || [];
+    var owns = [];
+    var writes = [];
+    var reads = [];
+    var follows = [];
+    for (var i = collections.length - 1; i >= 0; i--) {
+      var col = collections[i];
+      if (col.owners.indexOf(user.name) >= 0)
+        owns.push(col);
+      else if (user.following.indexOf(col.name) >= 0)
+        follows.push(col);
+      else if (col.writers.indexOf(user.name) >= 0)
+        writes.push(col);
+      else
+        reads.push(col);
+    };
+    res.render('me/collections', {
+      collections:collections,
+      owns:owns,
+      writes:writes,
+      reads:reads,
+      follows:follows,
+    });
+  });
 });
 
 // keys ---
