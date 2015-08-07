@@ -5,7 +5,7 @@ block header
   include ./includes/header.jade
 
 block content
-  h1 New Collection
+  h1 Edit Collection
   form.pure-form.pure-form-stacked(method='post')
     fieldset
       input(name='name', placeholder='Name',value="#{collection.name}")
@@ -14,4 +14,5 @@ block content
       input(name='owners', placeholder='Owners',value="#{collection.owners.join(', ')}")
       input(name='writers', placeholder='Readers',value="#{collection.writers.join(', ')}")
       input(name='readers', placeholder='Writers',value="#{collection.readers.join(', ')}")
-      button.pure-button.pure-button-primary(type='submit') Create
+      button.pure-button.pure-button-primary(type='submit') Update
+      

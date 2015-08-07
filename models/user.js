@@ -19,10 +19,6 @@ var userSchema = Schema({
     bio              : String,
     //manual collection references
     following        : [{ type: Schema.Types.ObjectId, ref: 'Collection' }],
-    //manual document references
-    drafts           : [{ type: String, ref: 'Document' }],
-    published        : [{ type: String, ref: 'Document' }],
-    unlisted         : [{ type: String, ref: 'Document' }],
     public_keys      : [Key], //first is default
     private_keys     : [Key], //first is default
     local            : {
@@ -63,6 +59,16 @@ var userSchema = Schema({
 
 userSchema.index({displayName: 'text', bio: 'text', name: 'text'});
 userSchema.index({name:1},{unique:true});
+
+//generate default key
+userSchema.virtual('default_key').get(function () {
+  if (this.private_keys.length > 0)
+    return this.private_keys[0].replace(/[\r\n]/g,' ');
+  if (this.public_keys.length > 0)
+    return this.public_keys[0].replace(/[\r\n]/g,' ');
+  return '';
+});
+
 // generating a hash
 userSchema.methods.generateHash = function(password) {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);

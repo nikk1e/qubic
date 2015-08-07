@@ -13,10 +13,40 @@ router.get('/models', function(req, res, next) {
   res.redirect('models/drafts');
 });
 
+router.all('*', function(req, res, next) {
+    res.header("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.header("Pragma", "no-cache");
+    res.header("Expires",0);
+    next();
+});
+
+router.all('/models/*', function(req, res, next) {
+  Document.aggregate() 
+    .match( { catalog : ('@' + req.user.name)} )
+    .group({
+      _id : "$status",
+      count: { $sum: 1 }
+    }).exec(function (err, response) {
+      if (err) next(err);
+      var counts = {
+        'draft': 0,
+        'public': 0,
+        'unlisted': 0,
+      };
+      for (var i = response.length - 1; i >= 0; i--) {
+        var r = response[i];
+        counts[r._id] = r.count;
+      };
+      req.counts = counts;
+      next();
+    });
+})
+
 router.get('/models/drafts', function(req, res, next) {
   Document.find({
-  	'_id': { '$in': req.user.drafts }
-  }, function(err, docs){
+    'catalog':('@' + req.user.name),
+    'status':'draft',
+  }, 'title slug created', function(err, docs){
     res.render('me/stories-draft', { stories:(docs || []) });
   });
 });
@@ -24,17 +54,17 @@ router.get('/models/drafts', function(req, res, next) {
 router.get('/models/public', function(req, res, next) {
   Document.find({
   	'catalog':('@' + req.user.name),
-  	'hidden':false
-  }, function(err, docs){
+  	'status':'public',
+  }, 'title slug created', function(err, docs){
     res.render('me/stories-public', { stories:(docs || []) });
   });
 });
 
 router.get('/models/unlisted', function(req, res, next) {
   Document.find({
-  	'catalog':('@' + req.user.name),
-  	'hidden':true
-  }, function(err, docs){
+    'catalog':('@' + req.user.name),
+    'status':'unlisted',
+  }, 'title slug created', function(err, docs){
     res.render('me/stories-unlisted', { stories:(docs || []) });
   });
 });

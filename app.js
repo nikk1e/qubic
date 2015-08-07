@@ -59,8 +59,8 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({limit: '150mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/fonts", express.static("node_modules/font-awesome"));
@@ -164,7 +164,9 @@ function isLoggedIn(req, res, next) {
 app.use('/admin', isLoggedIn, require('./routes/admin'));
 app.use('/me', isLoggedIn, require('./routes/me'));
 app.use('/search', require('./routes/search'))
-require('./routes/index')(app, passport);
+app.use('/api/share', share.rest())
+require('./routes/index')(app, passport, share);
+
 
 
 // catch 404 and forward to error handler

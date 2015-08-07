@@ -8,17 +8,20 @@ in one and only one collection.
 */
 var documentSchema = mongoose.Schema({
 	_id : String,
-	catalog: String, //collection.name or @user.name
+	catalog: String, //<collection.name> or @<user.name>
 	title: String,
 	slug: String,
+	fixed_title: {type:Boolean, default:false},
+	fixed_slug: {type:Boolean, default:false},
 	text: String,
 	data: String, //snapshot
+	version: { type: Number, default: 0 },
 	created: { type: Date, default: Date.now },
-	hidden: { type: Boolean, default: false } //unlisted
+	status: { type: String, default: 'draft' },
 });
 
 documentSchema.index({
-	hidden: 1,
+	status: 1,
 	title: 'text', 
 	text: 'text', 
 	slug: 'text'
@@ -29,6 +32,6 @@ documentSchema.index({
 		//text: 1
 	}
 });
-documentSchema.index({catalog: 1, hidden: 1});
+documentSchema.index({catalog: 1, status: 1});
 
 module.exports = mongoose.model('Document', documentSchema);

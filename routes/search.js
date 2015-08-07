@@ -31,7 +31,7 @@ function collections(str, limit) {
 
 function documents(str, limit) {
   return Document.find(
-    { $text: { $search: str }, hidden:false },
+    { $text: { $search: str }, status:'public' },
     { score: { $meta: "textScore" } }
   ).sort(
     { score: { $meta: "textScore" } }

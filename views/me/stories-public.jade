@@ -1,4 +1,8 @@
 extends stories
 
-block excuse
-  p You haven't published any models yet.
+block stories
+  if (stories.length > 0)
+    each story in stories
+      p Model description here.
+  else
+    p You haven't published any models yet.

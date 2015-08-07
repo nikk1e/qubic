@@ -1,8 +1,10 @@
 var Collection = require('../models/collection');
 var Document   = require('../models/document');
+var Submission = require('../models/submission');
 var User       = require('../models/user');
+var ot         = require('ot-sexpr');
 
-module.exports = function(app, passport) {
+module.exports = function(app, passport, share) {
 
 // normal routes ===============================================================
 
@@ -28,21 +30,181 @@ module.exports = function(app, passport) {
 
 	// EDIT SECTION ============================
 
-	app.get('/new', isLoggedIn, function(req, res) {
+	function genId() {
 		var rid = app.locals.rack();
 		var hour = app.locals.rackHour.toString(36);
-		var id = hour + rid;
-		//TODO: make document
-		res.redirect('/edit/' + id);
+		return hour + rid;
+	}
+
+	app.get('/new', isLoggedIn, function(req, res, next) {
+		//TODO: This cannot be on the get
+		// as it will be triggered 
+		// should actually be triggered when typing starts.
+		var id = genId();
+		var doc = new Document();
+		doc.hidden = true;
+		doc._id = id;
+		doc.catalog = '@' + req.user.name;
+		doc.title = '';
+		doc.slug = '';
+		doc.save(function(err) {
+			if (err) return next(err);
+			req.user.save(function(err) {
+				if (err) return next(err);
+				res.redirect('/edit/' + id);
+			});
+		});
 	});
 
-
-	app.get('/edit/:id', isLoggedIn, function(req, res) {
-		//fetch document.
-		//check permissions.
-		res.render('edit', { title: 'Qubic', docId: req.params.id });
+	app.param('draftId', function(req, res, next, id) {
+		//check permissions
+		Document.findOne({ _id :  id }, function(err, doc) {
+    		if (err) return next(err);
+    		req.doc = doc;
+    		if (doc.catalog[0] === '@') {
+    			var uname = doc.catalog.slice(1);
+    			if (req.user && uname === req.user.name) {
+    				req.catalog = req.user;
+    				req.can_edit = true;
+    				req.can_publish = true;
+    				return next();
+    			}
+    			User.findOne({name:uname}, function(err, user) {
+    				if (err) return next(err);
+    				req.catalog = user;
+    				next();
+    			});
+    		} else {
+    			Collection.findOne({name: doc.catalog}, function(err, col) {
+    				if (err) return next(err);
+    				req.catalog = col;
+    				if (col.owners.indexOf(user.name) >= 0) {
+    					req.can_publish = true;
+    					req.can_edit = true;
+    				}
+					else if (col.writers.indexOf(user.name) >= 0)
+    					req.can_edit = true;
+    				next();
+    			});
+    		}
+  		});
 	});
 
+	app.get('/edit/:draftId', isLoggedIn, function(req, res, next) {
+		var id = req.params.draftId;
+		var user = req.user;
+		if (!req.can_edit)
+			return next('You do not have permssion to edit this document.');
+		res.render('edit', {
+			title: 'Qubic',
+			doc: req.doc,
+			catalog: req.catalog,
+			docId: id,
+		});
+	});
+
+	//update a document in its current location
+	app.post('/edit/:draftId', isLoggedIn, function(req, res, next) {
+		//update document
+		var doc = req.doc;
+		var body = req.body;
+		if (!req.can_publish)
+			next('You do not have permission to publish this document');
+		doc.title = body.title || doc.title;
+		doc.slug = body.slug || doc.slug;
+		doc.fixed_title = body.fixed_title || doc.fixed_title;
+		doc.fixed_slug = body.fixed_slug || doc.fixed_slug;
+		doc.text = body.text || doc.text;
+		doc.data = body.data || doc.data;
+		doc.status = body.status || doc.status;
+		doc.version = parseInt(body.version) || doc.version;
+		doc.save(function(err) {
+			if (err) return next(err);
+			res.send({message:'Document updated'});
+		});
+	});
+
+	//move a document to a new location
+	app.post('/publish/:collection/:draftId', isLoggedIn, function(req, res, next) {
+		//update document
+		var doc = req.doc;
+		var body = req.body;
+		var col = req.collection;
+		if (!req.can_publish)
+			next('You do not have permission to publish this document');
+		if (col.owners.indexOf(user.name) === -1)
+			next('You do not have permission to publish to this collection');
+
+		var status = body.status || (col.hidden ? 'unlisted' : 'public');
+
+		doc.title = body.title;
+		doc.catalog = col.name;
+		doc.slug = body.slug;
+		doc.fixed_title = body.fixed_title;
+		doc.fixed_slug = body.fixed_slug;
+		doc.text = body.text;
+		doc.data = body.data;
+		doc.status = status;
+		doc.version = parseInt(body.version);
+		doc.save(function(err) {
+			if (err) return next(err);
+			res.send({message:'Document updated'});
+		});
+	});
+
+	app.post('/submit/:collection', isLoggedIn, function(req, res, next) {
+		//submit document for publication
+		var col = req.collection;
+		var user = req.user;
+		var body = req.body;
+		if (col.writers.indexOf(user.name) === -1 &&
+			col.owners.indexOf(user.name) === -1)
+			next('You do not have permission to submit to this collection');
+
+		var sub = new Submission();
+		sub._id = genId();
+		sub.document_id = body.document_id;
+		sub.catalog = req.params.collection;
+		sub.title = body.title;
+		sub.slug = body.slug;
+		sub.text = body.text;
+		sub.data = body.data;
+		sub.version = parseInt(body.version);
+		sub.submitted_by = req.user.name;
+		sub.save(function(err) {
+			if (err) return next(err);
+			res.send({message: ('Document Submitted to ' + sub.catalog)});
+		});
+	});
+
+	app.param('submission', function(req, res, next, id) {
+		Submission.findOne({_id: id}, function(err, sub) {
+			if (err) return next(err);
+			req.submission = sub;
+		});
+	})
+
+	app.post('/publish/:collection/:submission', isLoggedIn, function(req, res, next) {
+		var col = req.collection;
+		var user = req.user;
+		var sub = req.submission;
+		if (col.owners.indexOf(user.name) === -1)
+			next('You do not have permission to publish to this collection');
+		Document.findOne({_id:sub.document_id}, function(err, doc) {
+			if (err) return next(err);
+			doc.catalog = req.params.collection;
+			doc.title = sub.title;
+			doc.slug = sub.slug;
+			doc.text = sub.text;
+			doc.data = sub.data;
+			doc.version = sub.version;
+			doc.save(function(err) {
+				if (err) return next(err);
+				sub.remove();
+				res.send({message: ('Submission published to ' + doc.catalog)});
+			})
+		});
+	})
 
 	// PROFILE SECTION =========================
 	app.get('/me/settings', isLoggedIn, function(req, res) {
@@ -274,24 +436,60 @@ module.exports = function(app, passport) {
 		collection.name = '';
 		collection.title = '';
 		collection.description = '';
-		res.render('new-collection', {collection:collection });
+		collection.owners.push(req.user.name);
+		res.render('new-collection', {collection:collection});
 	});
 
 	app.post('/new-collection', isLoggedIn, function(req, res) {
 		var collection = new Collection();
-		collection.name = req.body.name.replace(' ','+');
+		//TODO: validate name
+		collection.name = req.body.name.replace(' ','-');
 		collection.title = req.body.title;
 		collection.description = req.body.description;
-		collection.owners.push(req.user.name);
+		col.owners = body.owners.split(/ *[,;] */g);
+		if (col.owners.length === 0)
+			col.owners.push(req.user.name);
+		col.writers = body.writers.split(/ *[,;] */g);
+		col.readers = body.readers.split(/ *[,;] */g);
 		collection.save(function (err) {
     		if (err) {
-    			req.flash('new', err);
+    			req.flash('new-collection', err);
       			return res.render('new-collection', {
       				collection:collection
       			});
     		}
     		res.redirect(collection.name);
   		});
+	});
+
+	app.get('/:collection/edit', isLoggedIn, function(req, res, next) {
+		res.render('edit-collection', {
+			collection: req.collection
+		});
+	});
+
+	app.post('/:collection/edit', isLoggedIn, function(req, res, next) {
+		var body = req.body;
+		var col = req.collection;
+		if (col.owners.indexOf(req.user.name) === -1)
+			next('You do not have permission to edit this collection');
+		col.name = body.name.replace(' ','-');
+		col.title = body.title;
+		col.description = body.description;
+		col.owners = body.owners.split(/ *[,;] */g);
+		if (col.owners.length === 0)
+			col.owners.push(req.user.name);
+		col.writers = body.writers.split(/ *[,;] */g);
+		col.readers = body.readers.split(/ *[,;] */g);
+		col.save(function(err) {
+			if (err) {
+				req.flash('edit-collection', err);
+      			return res.render('edit-collection', {
+      				collection:col
+      			});
+    		}
+    		res.redirect(col.name);
+		})
 	});
 
 	app.param('name', function(req, res, next, name) {
@@ -306,6 +504,83 @@ module.exports = function(app, passport) {
     		}
   		});
 	});
+
+	// Share ----------
+
+  	function fix_utf8(o) {
+  		if (o.type === 'char')
+  			o.value = decodeURIComponent(escape(o.value));
+  		return o;
+  	}
+
+  	//TODO: authentication check
+  	app.get('/api/:cName/:docName/ops',function(req, res, next) {
+	  var backend = share.backend;
+	  var from = parseInt(req.query.from) || 0;
+      var to = parseInt(req.query.to) || 1000;
+      backend.getOps(req.params.cName,
+        req.params.docName, from, to, function(err, ops) {
+      	if (err) return next(err);
+      	res.send(ops);
+      });
+    });
+
+  	//TODO: authentication check
+	app.get('/api/:cName/:docName/:rev?', function(req, res, next) {
+	  var backend = share.backend;
+	  backend.fetch(req.params.cName, req.params.docName, function(err, doc) {
+        if (err) next(err);
+        if (!doc.type) return res.status(404);
+  
+        var snapshot = ot.parse(decodeURIComponent(escape(doc.data)))[0];
+        var v = parseInt(req.params.rev || doc.v);
+        if (v > doc.v) return res.status(404, 'Unknown revision');
+        var from = v;
+        var to = doc.v + 1;
+        backend.getOps(req.params.cName,
+        	req.params.docName, from, to, function(err, ops) {
+      		if (err) return next(err);
+      		//TODO: rewind to snapshot
+      		var op;
+      		var prev = snapshot;
+      		var o;
+      		try {
+      		  for (var i = ops.length - 1; i >= 0; i--) {
+      			op = ops[i];
+      			if (op.op) {
+      				prev = snapshot;
+      				o = ot._trim(op.op);
+      				o = o.map(fix_utf8);
+      				o = ot.invert(o);
+      				snapshot = ot.apply(prev, o);
+      			}
+      		  };
+      		  //console.log(o)
+      		  //console.log(prev.toSexpr().replace(/'/g, '\\\''))
+           	  res.send(snapshot.toSexpr());
+      		} catch (e) {
+      			//console.log(o)
+      			//console.log(snapshot.toSexpr().replace(/'/g, '\\\''))
+      			return next(e)
+      		}
+        });
+      });
+	})
+
+	function playback(req, res, next) {
+		res.send('TODO: playback ops');
+	}
+
+	app.get('/@:name/:title/playback/:range?', playback);
+	app.get('/:collection/:title/playback/:range?', playback);
+
+	function show_revision(req, res, next) {
+		//req.collection -- might be a user
+		res.send('TODO: render document revision');
+	}
+
+	app.get('/@:name/:title/:rev?', show_revision);
+	app.get('/:collection/:title/:rev?',show_revision);
 
 	app.get('/@:name', function(req, res, next) {
 		Document.find({
