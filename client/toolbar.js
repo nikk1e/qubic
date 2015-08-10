@@ -20,7 +20,20 @@ var Toolbar = createClass({
 		});
 	},
 	render: function() {
-		return DOM.div({className:'toolbar'},"THis is a toolbar");
+		return DOM.div({className:'toolbar'},[
+			DOM.a({href:"#",className:"btn pull-left"},
+				[DOM.em({className:"fa fa-align-justify"},"")]),
+			DOM.a({href:"#",className:"btn pull-left"},
+				[DOM.em({className:"fa fa-search"},"")]),
+			DOM.a({href:"#",className:"btn pull-left"},
+				[DOM.em({className:"fa fa-info-circle"},"")]),
+			DOM.a({href:"#",className:"btn pull-left"},
+				[DOM.em({className:"fa fa-history"},"")]),
+			DOM.a({href:"#",className:"btn pull-right"},
+				[DOM.em({className:"fa fa-user"},"")]),
+			DOM.a({href:"#",className:"btn pull-right"},
+				[DOM.em({className:"fa fa-cloud-upload"},"")]),
+			]);
 	},
 });
 

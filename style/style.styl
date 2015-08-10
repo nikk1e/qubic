@@ -1,6 +1,7 @@
 body {
 	font-family: 'Roboto', arial, sans-serif;
 	color: #114;
+	font-weight: 300;
 	line-height: 28.5px;
 	font-size: 17px;
 }
@@ -29,22 +30,101 @@ sub { top: 0.4em; }
 
 .content {
 	margin: auto;
-	max-width: 700px;
+	max-width: 800px;
 }
 
 .sidebar {
 	position:absolute;
 	width: 300px;
+	font-family: "Open Sans","Clear Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+top: 0;
+left: 0;
+bottom: 0;
+z-index: 1;
+width: 300px;
+color: #364149;
+background: #fafafa;
+border-right: 1px solid rgba(0,0,0,0.07);
+-webkit-transition: left 250ms ease;
+-moz-transition: left 250ms ease;
+-o-transition: left 250ms ease;
+transition: left 250ms ease;
+}
+
+ul.summary .fa {
+  position: absolute;
+  right: 9px;
+}
+
+ul.summary {
+	position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+overflow-y: auto;
+list-style: none;
+margin: 0;
+padding: 0;
+-webkit-transition: top 250ms ease;
+-moz-transition: top 250ms ease;
+-o-transition: top 250ms ease;
+transition: top 250ms ease;
+}
+
+ul.summary li {
+	list-style:none
+}
+
+ul.summary li a {
+display: block;
+padding: 10px 15px;
+border-bottom: 0;
+color: #364149;
+background: transparent;
+text-overflow: ellipsis;
+overflow: hidden;
+white-space: nowrap;
+position: relative;
+text-decoration:none;
+}
+
+#sidebar {
+	font-weight: 300;
+font-size: 14px;
+line-height: 16px;
 }
 
 .book-content {
-	position:absolute;
-	left: 300px;
-	right: 0;
-	bottom: 0;
-	top: 0;
+position:absolute;
+left: 300px;
+right: 0;
+bottom: 0;
+top: 0;
+overflow-y: auto;
+color: #000;
+background: #fff;
+-webkit-transition: left 250ms ease;
+-moz-transition: left 250ms ease;
+-o-transition: left 250ms ease;
+transition: left 250ms ease;
 }
 
+.toolbar {
+	height: 50px;
+	padding: 0 8px;
+}
+
+.toolbar .btn {
+height: 50px;
+color: #ccc;
+padding: 0 15px;
+line-height: 50px;
+}
+
+.toolbar .btn:hover {
+color: #444;
+}
 
 .icon_link {
 	display: block;
