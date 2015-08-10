@@ -6,23 +6,21 @@ block content
   ul
     li
       a(href="drafts")
+        if (req.counts.draft > 0)
+          span= req.counts.draft
+          | 
         | Drafts
-        if (user.drafts.length > 0)
-          span.count= user.drafts.length
     li
       a(href="public")
+        if (req.counts.public > 0)
+          span= req.counts.public
+          | 
         | Public
-        if (user.published.length > 0)
-          span.count= user.published.length
     li
       a(href="unlisted")
+        if (req.counts.unlisted > 0)
+          span= req.counts.unlisted
+          | 
         | Unlisted
-        if (user.unlisted.length > 0)
-          span.count= user.unlisted.length
   
-  if (stories.length > 0)
-    each story in stories
-      p Model description here.
-  else
-    block excuse
-      p No models found.
+  block stories

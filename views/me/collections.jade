@@ -2,7 +2,27 @@ extends layout
 
 block content
   h1 Collections
-  .own
-  .contributor
-  .followed
-  .suggested
+  if owns.length > 0
+    .owns
+      h3 Own
+      each collection in owns
+        a(href="/#{collection.name}")= collection.title
+        p= collection.description
+  if follows.length > 0
+    .follows
+      h3 Following
+      each collection in follows
+        a(href="/#{collection.name}")= collection.title
+        p= collection.description
+  if writes.length > 0
+    .writes
+      h3 Writer
+      each collection in writes
+        a(href="/#{collection.name}")= collection.title
+        p= collection.description
+  if reads.length > 0
+    .reads
+      h3 Reader
+      each collection in reads
+        a(href="/#{collection.name}")= collection.title
+        p= collection.description

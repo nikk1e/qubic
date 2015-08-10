@@ -91,11 +91,13 @@ block content
   h3 Public
   each key in user.public_keys
     p= key.description
-    p= key.fingerprint
+    p= key.fingerprint.match(/.{1,2}/g).join(':')
+    p Added on #{moment(key.created).format('ll')}
   h3 Private
   each key in user.private_keys
     p= key.description
-    p= key.fingerprint
+    p= key.fingerprint.match(/.{1,2}/g).join(':')
+    p Added on #{moment(key.created).format('ll')}
   form#key-form(action='keys',method='post')
     .form-group.title
       label.sr-only(for='key-title') Title
