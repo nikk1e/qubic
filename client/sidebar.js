@@ -5,7 +5,7 @@ var createClass = friar.createClass;
 var ot = require('ot-sexpr');
 var List = ot.List;
 
-function toHeaders(list, stack, num) {
+function toHeaders(list, filter, stack, num) {
 	stack = stack || [];
 	num = num || [0,0,0,0,0,0,0];
 	level = 0;
@@ -30,6 +30,7 @@ function toHeaders(list, stack, num) {
 	//console.log("toHeaders")
 	//console.log(list.head)
 	var h = list.head().sym;
+	var show = !(filter && !(filter.test(list.textContent())))
 	switch (h) {
 		case 'h1':
 		case 'h2':
@@ -40,13 +41,15 @@ function toHeaders(list, stack, num) {
 		    var lvl = parseInt(h.slice(1));
 		    if (lvl < level) clearAfter(lvl);
 		    num[lvl]++;
-			stack.push({level:lvl, text:list.textContent(), id:list.id, num:num.slice(1,lvl+1).join('.')});
+		    if (show)
+				stack.push({level:lvl, text:list.textContent(), id:list.id, num:num.slice(1,lvl+1).join('.')});
 			//console.log(stack)
 			break;
 		case 'encrypted':
 			num[0]++;
 			clearAfter(0);
-			stack.push({level:0, text:'Section', id:list.id, num:Roman(num[0]), tag:'lock'});
+			if (show)
+				stack.push({level:0, text:'Section', id:list.id, num:Roman(num[0]), tag:'lock'});
 			break;
 		case 'section':
 		case 'encrypt':
@@ -55,15 +58,18 @@ function toHeaders(list, stack, num) {
 			var el = {level:0, text:'Section', id:list.id, num:Roman(num[0])}
 			if (h === 'encrypt')
 				el.tag ='unlock';
-			stack.push(el);
+			if (show)
+				stack.push(el);
 			//fall through
 		case 'doc':
 			for (var i = 1; i < list.values.length; i++) {
 				var child = list.values[i];
-				toHeaders(child, stack, num);
+				toHeaders(child, filter, stack, num);
 			};
 			break;
 		default:
+			if (filter && show)
+				stack.push({level:6, text:list.textContent(), id:list.id, num:''});
 			break;
 	}
 	return stack;
@@ -80,26 +86,17 @@ function Roman(n) {
 }
 
 var Sidebar = createClass({
-	getInitialState: function() {
-		return {
-			doc: this.props.store.document()
-		};
-	},
-	didMount: function() {
-		this.props.store.on('change', this.onChange);
-	},
-	willUnmount: function() {
-		this.props.store.removeListener('change', this.onChange);
-	},
-	onChange: function() {
-		this.setState({
-			doc: this.props.store.document()
-		});
-	},
 	render: function() {
-		var doc = this.state.doc;
-		var hs = toHeaders(doc);
+		var doc = this.props.doc;
+		var filter;
 		var p = this.props;
+		var showSearch = !!p.search;
+		if (p.filter && p.filter.length >= 3)
+			filter = new RegExp(p.filter,'ig');
+		var hs = toHeaders(doc, filter);
+		var cname = 'sidebar';
+		if (showSearch)
+			cname += ' with-search';
 		var cs = hs.map(function(it) {
 			var cels = [
 			DOM.span({},it.text),
@@ -115,7 +112,17 @@ var Sidebar = createClass({
 				DOM.a({href:toRef(it.id)},cels),
 				]);
 		})
-		return DOM.div({id:this.props.id, className:'sidebar'},[
+		return DOM.div({id:this.props.id, className:cname},[
+			DOM.div({className:"book-search"},[
+				DOM.input({
+					type:"text",
+					placeholder:"Type to search",
+					className:"form-control",
+					//onChange: p.onSearchChange,
+					onKeyup: p.onSearchChange,
+					value: p.filter,
+					}),
+				]),
 			DOM.ul({className:"summary"},cs),
 			]);
 	},

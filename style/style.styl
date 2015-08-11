@@ -99,6 +99,41 @@ font-size: 14px;
 line-height: 16px;
 }
 
+.book .sidebar .book-search {
+    padding: 6px;
+    background: transparent;
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    -webkit-transition: top .5s ease;
+    -moz-transition: top .5s ease;
+    -o-transition: top .5s ease;
+    transition: top .5s ease
+}
+
+.book .sidebar .book-search input,
+.book .sidebar .book-search input:focus,
+.book .sidebar .book-search input:hover {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    outline: 0;
+    line-height: 22px;
+    padding: 7px 4px;
+    color: inherit
+}
+
+.book .sidebar.with-search .book-search {
+    top: 0
+}
+
+.book .sidebar.with-search ul.summary {
+    top: 50px
+}
+
 .book-content {
 position:absolute;
 left: 300px;

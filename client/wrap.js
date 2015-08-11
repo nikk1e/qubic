@@ -14,6 +14,7 @@ var Wrap = createClass({
 			sidebar: 'summary',
 			search: false,
 			publish: false,
+			filter: '',
 		};
 	},
 	didMount: function() {
@@ -41,10 +42,13 @@ var Wrap = createClass({
 		this.toggleSidebar('history');
 	},
 	onSearch: function() {
-		if (!this.search)
-			this.setState({sidebar:'summary', search:true});
+		if (!this.state.search)
+			this.setState({sidebar:'summary', search:true, filter:''});
 		else
-			this.setState({search:false});
+			this.setState({search:false, filter:''});
+	},
+	onSearchChange: function(e) {
+		this.setState({filter:e.target.value});
 	},
 	onPublish: function() {
 		this.setState({publish:(!(this.state.publish))});
@@ -54,14 +58,14 @@ var Wrap = createClass({
 		var s = this.state;
 		var cname = 'book ' + s.sidebar;
 		this.editor = Editor({
-			id:"preview",
-			store:p.store,
-			plugins:p.plugins,
+			id: "preview",
+			store: p.store,
+			plugins: p.plugins,
 		});
 		var main = [Toolbar({
-			id:"toolbar",
-			className:"toolbar",
-			store:p.store,
+			id: "toolbar",
+			className: "toolbar",
+			store: p.store,
 			toggleSummary: this.onSummary,
 			toggleInfo: this.onInfo,
 			toggleHistory: this.onHistory,
@@ -72,7 +76,15 @@ var Wrap = createClass({
 		// main.push(...)
 		main.push(DOM.div({id:"preview"},[this.editor]));
 		return DOM.div({className:cname}, [
-			Sidebar({id:"sidebar", show:s.sidebar, doc:s.doc, store:p.store}),
+			Sidebar({
+				id:"sidebar",
+				show:s.sidebar,
+				search:s.search,
+				doc:s.doc,
+				store:p.store,
+				onSearchChange:this.onSearchChange,
+				filter:s.filter,
+			}),
 			DOM.div({id:"book-content", className:"book-content"},main),
 			]);
 	},
