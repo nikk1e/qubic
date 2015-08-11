@@ -69,15 +69,15 @@ userSchema.virtual('default_key').get(function () {
 });
 
 userSchema.virtual('owners').get(function () {
-  return ['@' + this.name];
+  return [this.name];
 });
 
 userSchema.virtual('writers').get(function () {
-  return ['@' + this.name];
+  return [this.name];
 });
 
 userSchema.virtual('readers').get(function () {
-  return ['@' + this.name];
+  return [this.name];
 });
 
 // generating a hash

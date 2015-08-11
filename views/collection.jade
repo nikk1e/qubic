@@ -5,5 +5,14 @@ block header
   include ./includes/header.jade
 
 block content
-  h1= collection.name
-  p TODO render all the documents here for this collection
+  h1= collection.title
+  if (stories.length > 0)
+    each story in stories
+      .story-block
+        h3.title
+          a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+        a(href="/edit/#{story._id}")= story.slug
+        .meta-line
+          span #{moment(story.updated).fromNow()}
+  else
+    p No models published yet.

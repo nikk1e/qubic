@@ -80,7 +80,7 @@ var Publish = createClass({
 			title: ele['title'].value || '',
 			subtitle: ele['subtitle'].value || '',
 			catalog: ele['catalog'].value || '',
-			unlisted: ele['unlisted'].value || this.state.unlisted,
+			unlisted: !!ele['unlisted'].checked,
 		});
 	},
 	onSubmit: function(e) {

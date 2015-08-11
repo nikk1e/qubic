@@ -79,11 +79,11 @@ module.exports = function(app, passport, share) {
     				if (err) return next(err);
     				if (!col) return next(new Error('Could not find collection ' + doc.catalog))
     				req.catalog = col;
-    				if (col.owners.indexOf(user.name) >= 0) {
+    				if (col.owners.indexOf(req.user.name) >= 0) {
     					req.can_publish = true;
     					req.can_edit = true;
     				}
-					else if (col.writers.indexOf(user.name) >= 0)
+					else if (col.writers.indexOf(req.user.name) >= 0)
     					req.can_edit = true;
     				next();
     			});
@@ -161,10 +161,13 @@ module.exports = function(app, passport, share) {
 		var doc = req.doc;
 		var body = req.body;
 		var col = req.catalog;
+		var user = req.user;
 		if (!req.can_publish)
 			return next(new Error('You do not have permission to publish this document'));
-		if (req.is_collection && col.owners.indexOf(user.name) === -1)
+		if (req.is_collection && col.owners.indexOf(user.name) === -1) {
+			console.log(col.owners)
 			return next(new Error('You do not have permission to publish to this collection'));
+		}
 		else if (!req.is_collection && col.name !== req.user.name)
 			return next(new Error('You do not have permission to publish to this user'));
 
@@ -677,7 +680,7 @@ module.exports = function(app, passport, share) {
 	app.get('/:collection', function(req, res) {
 		Document.find({
   			'catalog':req.collection.name,
-  			'hidden':false //public
+  			'status':'public',
   		}, function(err, docs){
   			if (err) return next(err);
     		res.render('collection', {
