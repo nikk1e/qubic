@@ -85,18 +85,18 @@ function Roman(n) {
 	return ROMAN[n] || n;
 }
 
-var Sidebar = createClass({
+var Summary = createClass({
 	render: function() {
-		var doc = this.props.doc;
-		var filter;
 		var p = this.props;
-		var showSearch = !!p.search;
+		var doc = p.doc;
+		var filter;
 		if (p.filter && p.filter.length >= 3)
-			filter = new RegExp(p.filter,'ig');
+			try {
+				filter = new RegExp(p.filter,'ig');
+			} catch(e) {
+				console.log(e);
+			}
 		var hs = toHeaders(doc, filter);
-		var cname = 'sidebar';
-		if (showSearch)
-			cname += ' with-search';
 		var cs = hs.map(function(it) {
 			var cels = [
 			DOM.span({},it.text),
@@ -112,6 +112,42 @@ var Sidebar = createClass({
 				DOM.a({href:toRef(it.id)},cels),
 				]);
 		})
+		return DOM.ul({className:"summary"},cs);
+	},
+});
+
+var Info = createClass({
+	render: function() {
+		return DOM.div({className:"info"},"Info goes here");
+	}
+});
+
+var History = createClass({
+	render: function() {
+		return DOM.div({className:"history"},"History goes here");
+	}
+});
+
+var Sidebar = createClass({
+	render: function() {
+		var doc = this.props.doc;
+		
+		var p = this.props;
+		var showSearch = !!p.search;
+		var cname = 'sidebar';
+		if (showSearch && p.show === 'summary')
+			cname += ' with-search';
+
+		var Show = Summary;
+		switch (p.show) {
+			case 'info':
+				Show = Info;
+				break;
+			case 'history':
+				Show = History;
+				break;
+		}
+		
 		return DOM.div({id:this.props.id, className:cname},[
 			DOM.div({className:"book-search"},[
 				DOM.input({
@@ -123,7 +159,7 @@ var Sidebar = createClass({
 					value: p.filter,
 					}),
 				]),
-			DOM.ul({className:"summary"},cs),
+			Show({filter:p.filter, doc:doc}),
 			]);
 	},
 });
