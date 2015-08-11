@@ -41,7 +41,7 @@ function toHeaders(list, stack, num) {
 		    if (lvl < level) clearAfter(lvl);
 		    num[lvl]++;
 			stack.push({level:lvl, text:list.textContent(), id:list.id, num:num.slice(1,lvl+1).join('.')});
-			console.log(stack)
+			//console.log(stack)
 			break;
 		case 'encrypted':
 			num[0]++;
@@ -99,6 +99,7 @@ var Sidebar = createClass({
 	render: function() {
 		var doc = this.state.doc;
 		var hs = toHeaders(doc);
+		var p = this.props;
 		var cs = hs.map(function(it) {
 			var cels = [
 			DOM.span({},it.text),
@@ -114,7 +115,7 @@ var Sidebar = createClass({
 				DOM.a({href:toRef(it.id)},cels),
 				]);
 		})
-		return DOM.div({className:'sidebar'},[
+		return DOM.div({id:this.props.id, className:'sidebar'},[
 			DOM.ul({className:"summary"},cs),
 			]);
 	},

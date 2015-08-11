@@ -56,16 +56,15 @@ var userSchema = Schema({
     }
 
 });
-
+    
 userSchema.index({displayName: 'text', bio: 'text', name: 'text'});
 userSchema.index({name:1},{unique:true});
 
-//generate default key
 userSchema.virtual('default_key').get(function () {
   if (this.private_keys.length > 0)
-    return this.private_keys[0].replace(/[\r\n]/g,' ');
+    return this.private_keys[0].key.replace(/[\r\n]/g,' ');
   if (this.public_keys.length > 0)
-    return this.public_keys[0].replace(/[\r\n]/g,' ');
+    return this.public_keys[0].key.replace(/[\r\n]/g,' ');
   return '';
 });
 

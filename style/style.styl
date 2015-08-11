@@ -51,6 +51,10 @@ border-right: 1px solid rgba(0,0,0,0.07);
 transition: left 250ms ease;
 }
 
+.none .sidebar {
+	left: -300px;
+}
+
 ul.summary .fa {
   position: absolute;
   right: 9px;
@@ -110,6 +114,10 @@ background: #fff;
 transition: left 250ms ease;
 }
 
+.none .book-content {
+	left: 0px;
+}
+
 .toolbar {
 	height: 50px;
 	padding: 0 8px;
@@ -124,6 +132,65 @@ line-height: 50px;
 
 .toolbar .btn:hover {
 color: #444;
+}
+
+.toolbar h1 {
+color: #444;
+	margin: 0;
+font-size: 20px;
+font-weight: 200;
+text-align: center;
+line-height: 50px;
+opacity: 0;
+-webkit-transition: opacity ease .4s;
+-moz-transition: opacity ease .4s;
+-o-transition: opacity ease .4s;
+transition: opacity ease .4s;
+padding-left: 200px;
+padding-right: 200px;
+-webkit-transition: opacity .2s ease;
+-moz-transition: opacity .2s ease;
+-o-transition: opacity .2s ease;
+transition: opacity .2s ease;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.toolbar:hover h1 {
+	opacity: 1;
+}
+
+
+
+.nav-tab {
+	padding: 0;
+	display: block;
+	height: 50px;
+	border-top: 1px solid #ccc;
+}
+
+.nav-tab li {
+display: inline-block;
+margin-right: 20px;
+margin-top: -1px;
+}
+
+.nav-tab li.active {
+	border-top: 1px solid #444;
+}
+
+.nav-tab li.active a {
+	color: #444;
+}
+
+.nav-tab li a {
+	text-decoration: none;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #ccc;
+	display: inline-block;
+	padding: 10px 0;
 }
 
 .icon_link {

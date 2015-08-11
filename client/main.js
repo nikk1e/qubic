@@ -1,17 +1,15 @@
+var Slate = require('slatejs');
+var Wrap = require('./wrap');
+
 document.addEventListener('DOMContentLoaded', function () {
-    var Slate = window.Slate = require('slatejs');
 
-    var Sidebar = require('./sidebar');
-    var Toolbar = require('./toolbar');
-
-    var preview = document.getElementById('preview');
-    var sidebar = document.getElementById('sidebar');
-    var toolbar = document.getElementById('toolbar');
+	var wrapElm = document.getElementById('wrap');
     var plugins = Slate.plugins;
     var Selection = Slate.Selection;
 	var Region = Slate.Region;
 
 	var e = Slate.editor;
+
 
 var dummy = new BCSocket(null, {reconnect: true});
 dummy.canSendJSON = false; //need this because goog.json.serialize doesn't call toJSON
@@ -38,18 +36,15 @@ sharedoc.whenReady(function() {
 	store = new Slate.Store(sharedoc.createContext());
 
 	store.select(sel);
-	editor = e.Editor({store: store, plugins:[
+
+	window.wrap = Wrap({store: store, plugins:[
 		plugins.base,
 		plugins.table,
 		plugins.qube,
 		plugins.encryption,
 	]});
 
-	var sbar = Sidebar({store:store});
-	var tbar = Toolbar({store:store});
-	e.friar.renderComponent(sbar, sidebar);
-	e.friar.renderComponent(tbar, toolbar);
-	e.friar.renderComponent(editor, preview);
+	e.friar.renderComponent(wrap, wrapElm)
 });
 
 
