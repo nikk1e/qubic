@@ -71,7 +71,7 @@ var Publish = createClass({
 			title: '',
 			subtitle: '',
 			catalog: '',
-			unlisted: false,
+			unlisted: (this.props.status === 'unlisted'),
 		};
 	},
 	onChange: function(e) {
@@ -168,7 +168,7 @@ var Publish = createClass({
 						type:'checkbox',
 						id:'unlisted',
 						name:'unlisted',
-						value:s.unlisted
+						checked: (s.unlisted ? 'checked' : undefined),
 					}),
 					DOM.text(" Private/Unlisted"),
 				]),
@@ -315,6 +315,7 @@ var Wrap = createClass({
 					owns: p.owns,
 					catalog: s.catalog,
 					title: title,
+					status: p.status,
 					subtitle: subtitle,
 					togglePublish: this.onPublish,
 				}),
