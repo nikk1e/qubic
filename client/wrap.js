@@ -75,16 +75,18 @@ var Publish = createClass({
 		};
 	},
 	onChange: function(e) {
-		var t = e.target;
-		switch (t.name) {
-			case 'catalog':
-				this.setState({catalog:t.value});
-				break;
-		}
+		var ele = e.target.form.elements;
+		this.setState({
+			title: ele['title'].value || '',
+			subtitle: ele['subtitle'].value || '',
+			catalog: ele['catalog'].value || '',
+			unlisted: ele['unlisted'].value || this.state.unlisted,
+		});
 	},
 	onSubmit: function(e) {
 		e.preventDefault();
 		e.stopPropagation();
+		//this.onChange(e);
 		var s = this.state;
 		var p = this.props;
 		var catalog = s.catalog || p.catalog;
@@ -113,6 +115,7 @@ var Publish = createClass({
 			status:(s.unlisted ? 'unlisted':'public'),
 		};
 		req.send(JSON.stringify(obj));
+		p.togglePublish();
 		return false;
 	},
 	isPub: function() {
@@ -313,6 +316,7 @@ var Wrap = createClass({
 					catalog: s.catalog,
 					title: title,
 					subtitle: subtitle,
+					togglePublish: this.onPublish,
 				}),
 				DOM.div({id:"preview"},[this.editor]),
 			]),
