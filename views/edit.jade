@@ -5,7 +5,11 @@ block content
   script(type="text/javascript").
     var docId = '#{docId}';
     var docCollection = 'draft';
+    var catalog = '#{doc.catalog}';
+    var docStatus = '#{doc.status}';
     var defaultKey = '#{user.default_key}'
+    var owns = !{owns};
+    var writes = !{writes};
     window.onunload = function() {
       //alert('Leaving page')
       //TODO: snapshot the document here. (and wait)

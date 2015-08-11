@@ -28,6 +28,8 @@ var doc = '(doc (section (h1 "") (p "")))'
 
 var sel = new Selection([new Region(7,7)]); //, new Region(298,348), new Region(380), new Region(495,400), new Region(870,830), new Region(1130,1070), new Region(1200,1300), new Region(1743+8,1734)]);
 
+var catalog = window.catalog || 'unknown';
+
 sharedoc.whenReady(function() {
 	if (!sharedoc.type)
 		sharedoc.create('sexpr', doc);
@@ -37,7 +39,12 @@ sharedoc.whenReady(function() {
 
 	store.select(sel);
 
-	window.wrap = Wrap({store: store, plugins:[
+	window.wrap = Wrap({store: store,
+		catalog: catalog,
+		docId: window.docId,
+		owns: window.owns || [],
+		status: window.docStatus || 'draft',
+		plugins:[
 		plugins.base,
 		plugins.table,
 		plugins.qube,

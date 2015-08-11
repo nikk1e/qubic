@@ -70,33 +70,95 @@ var Publish = createClass({
 		return {
 			title: '',
 			subtitle: '',
-			category: '',
+			catalog: '',
 			unlisted: false,
 		};
+	},
+	onChange: function(e) {
+		var t = e.target;
+		switch (t.name) {
+			case 'catalog':
+				this.setState({catalog:t.value});
+				break;
+		}
+	},
+	onSubmit: function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		var s = this.state;
+		var p = this.props;
+		var catalog = s.catalog || p.catalog;
+		var req = new XMLHttpRequest();
+		var url = (this.isPub() ? '/publish' : '/submit') +
+		  '/' + catalog + '/' + p.docId;
+		//return false;
+		req.onreadystatechange = function (data) {
+  			// code
+  			if (req.readyState == XMLHttpRequest.DONE ) {
+  				if (req.status === 200)
+  					console.log(data);
+  				else if (req.status === 400)
+  					console.log(data);
+  				else
+  					console.log(req.responseText);
+  			}
+		};
+		req.open('POST', url);
+		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		var obj = {
+			title:(s.title || p.title),
+			slug:(s.subtitle || p.subtitle),
+			text:p.doc.textContent(),
+			data:p.doc.toSexpr(),
+			status:(s.unlisted ? 'unlisted':'public'),
+		};
+		req.send(JSON.stringify(obj));
+		return false;
+	},
+	isPub: function() {
+		var s = this.state;
+		var p = this.props;
+		var catalog = s.catalog || p.catalog;
+		return ((p.owns || []).indexOf(catalog) !== -1);
 	},
 	render: function() {
 		var s = this.state;
 		var p = this.props;
+
+		var catalog = s.catalog || p.catalog;
+
+		var title = this.isPub() ? "Publish" : "Submit";
 		return DOM.div({className:"publish content"},[
-			DOM.h2({},"Publish"),
-			DOM.form({className:'pure-form pure-form-stacked pure-g'},[
+			DOM.h2({},title),
+			DOM.form({
+				className:'pure-form pure-form-stacked pure-g',
+				onChange: this.onChange,
+				onSubmit: this.onSubmit,
+			},[
+
+				DOM.label({'for':'title',className:"pure-u-1"},"Title"),
 				DOM.input({
 					className:"pure-u-1",
 					type:'text',
 					placeholder:p.title,
 					name:'title',
+					id:'title',
 					value:s.title}),
+				DOM.label({'for':'subtitle',className:"pure-u-1"},"Subtitle"),
 				DOM.textarea({
 					className:"pure-u-1",
 					placeholder:p.subtitle,
-					name:'subtitle'
+					name:'subtitle',
+					id:'subtitle',
 				}, s.subtitle),
+				DOM.label({'for':'catalog',className:"pure-u-1"},"Catalog"),
 				DOM.input({
 					className:"pure-u-1",
 					type:'text',
-					placeholder:'Category',
-					name:'category',
-					value:s.category
+					placeholder:p.catalog,
+					name:'catalog',
+					id:'catalog',
+					value:s.catalog,
 				}),
 				DOM.label({'for':'unlisted', className:"pure-u-4-5"},[
 					DOM.input({
@@ -105,12 +167,12 @@ var Publish = createClass({
 						name:'unlisted',
 						value:s.unlisted
 					}),
-					DOM.text(" Private"),
+					DOM.text(" Private/Unlisted"),
 				]),
 				DOM.button({
 					className:"pure-button pure-button-primary btn pure-u-1-5",
 					type:'submit',
-				},"Publish")
+				},title)
 			]),
 		]);
 	},
@@ -120,6 +182,7 @@ var Wrap = createClass({
 	getInitialState: function() {
 		return {
 			doc: this.props.store.document(),
+			catalog: this.props.catalog,
 			sidebar: 'summary',
 			search: false,
 			publish: false,
@@ -128,14 +191,60 @@ var Wrap = createClass({
 	},
 	didMount: function() {
 		this.props.store.on('change', this.onChange);
+		this.onChange();
 	},
 	willUnmount: function() {
 		this.props.store.removeListener('change', this.onChange);
 	},
+	updateSlug: function() {
+		console.log('updateSlug');
+		var p = this.props;
+		var s = this.state;
+		var req = new XMLHttpRequest();
+		//return false;
+		req.onreadystatechange = function (data) {
+  			// code
+  			if (req.readyState == XMLHttpRequest.DONE ) {
+  				if (req.status === 200)
+  					console.log(req.responseText);
+  				else if (req.status === 400)
+  					console.log(req.responseText);
+  				else
+  					console.log(req.responseText);
+  			}
+		};
+		req.open('POST', '/edit/' + p.docId);
+		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		var obj = {
+			title:this.title,
+			slug:this.subtitle,
+		};
+		console.log(JSON.stringify(obj))
+		req.send(JSON.stringify(obj));
+		return false;
+	},
 	onChange: function() {
+		var p = this.props;
+		var s = this.state;
 		this.setState({
-			doc: this.props.store.document()
+			doc: p.store.document()
 		});
+		if (p.status === 'draft') {
+			var title = findTitle(s.doc);
+			var subtitle = findSubtitle(s.doc);
+			var self = this;
+			if (this.title !== title || this.subtitle !== subtitle) {
+				console.log('Titles have changed')
+				this.title = title;
+				this.subtitle = subtitle;
+				if (this.timeout)
+					clearTimeout(this.timeout);
+				this.timeout = setTimeout(function() {
+					self.timeout = null;
+					self.updateSlug();
+				}, 3000);
+			}
+		}
 	},
 	toggleSidebar: function(n) {
 		var s = this.state;
@@ -199,6 +308,9 @@ var Wrap = createClass({
 				}),
 				Publish({
 					doc:s.doc,
+					docId: p.docId,
+					owns: p.owns,
+					catalog: s.catalog,
 					title: title,
 					subtitle: subtitle,
 				}),

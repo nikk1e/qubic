@@ -68,6 +68,18 @@ userSchema.virtual('default_key').get(function () {
   return '';
 });
 
+userSchema.virtual('owners').get(function () {
+  return ['@' + this.name];
+});
+
+userSchema.virtual('writers').get(function () {
+  return ['@' + this.name];
+});
+
+userSchema.virtual('readers').get(function () {
+  return ['@' + this.name];
+});
+
 // generating a hash
 userSchema.methods.generateHash = function(password) {
     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);

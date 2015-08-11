@@ -6,7 +6,12 @@ block link
 block stories
   if (stories.length > 0)
     each story in stories
-      p Model description here.
+      .story-block
+        h3.title
+          a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+        a(href="/edit/#{story._id}")= story.slug
+        .meta-line
+          span Published on #{moment(story.updated || story.created).format('MMM D')}
   else
     p You haven't published any models yet.
     p Unlisted models will not show on your profile or in search results. Only people with the url can view the model.

@@ -77,6 +77,7 @@ module.exports = function(app, passport, share) {
     		} else {
     			Collection.findOne({name: doc.catalog}, function(err, col) {
     				if (err) return next(err);
+    				if (!col) return next(new Error('Could not find collection ' + doc.catalog))
     				req.catalog = col;
     				if (col.owners.indexOf(user.name) >= 0) {
     					req.can_publish = true;
@@ -90,7 +91,34 @@ module.exports = function(app, passport, share) {
   		});
 	});
 
-	app.get('/edit/:draftId', isLoggedIn, function(req, res, next) {
+	function myCollections(req, res, next) {
+		var user = req.user;
+  		Collection.find({ $or: [
+    		{owners:user.name},
+    		{writers:user.name},
+    		{readers:user.name},
+		]}, 'name owners writers readers', function(err, collections) {
+			if (err) return next(err);
+			var owns = ['@' + user.name];
+    		var writes = [];
+    		var reads = [];
+    		for (var i = collections.length - 1; i >= 0; i--) {
+    		  var col = collections[i];
+    		  if (col.owners.indexOf(user.name) >= 0)
+    		    owns.push(col.name);
+    		  else if (col.writers.indexOf(user.name) >= 0)
+    		    writes.push(col.name);
+    		  else
+    		    reads.push(col.name);
+    		}
+    		req.owns = owns;
+    		req.writes = writes;
+    		req.reads = reads;
+    		next();
+		});
+  	}
+
+	app.get('/edit/:draftId', isLoggedIn, myCollections, function(req, res, next) {
 		var id = req.params.draftId;
 		var user = req.user;
 		if (!req.can_edit)
@@ -99,6 +127,8 @@ module.exports = function(app, passport, share) {
 			title: 'Qubic',
 			doc: req.doc,
 			catalog: req.catalog,
+			owns: JSON.stringify(req.owns),
+			writes: JSON.stringify(req.writes),
 			docId: id,
 		});
 	});
@@ -109,15 +139,16 @@ module.exports = function(app, passport, share) {
 		var doc = req.doc;
 		var body = req.body;
 		if (!req.can_publish)
-			next('You do not have permission to publish this document');
+			return next(new Error('You do not have permission to update this document'));
+		
+		console.log(body);
+
 		doc.title = body.title || doc.title;
 		doc.slug = body.slug || doc.slug;
-		doc.fixed_title = body.fixed_title || doc.fixed_title;
-		doc.fixed_slug = body.fixed_slug || doc.fixed_slug;
-		doc.text = body.text || doc.text;
-		doc.data = body.data || doc.data;
-		doc.status = body.status || doc.status;
-		doc.version = parseInt(body.version) || doc.version;
+		//doc.text = body.text || doc.text;
+		//doc.data = body.data || doc.data;
+		//doc.status = body.status || doc.status;
+		//doc.version = parseInt(body.version) || doc.version;
 		doc.save(function(err) {
 			if (err) return next(err);
 			res.send({message:'Document updated'});
@@ -125,46 +156,53 @@ module.exports = function(app, passport, share) {
 	});
 
 	//move a document to a new location
-	app.post('/publish/:collection/:draftId', isLoggedIn, function(req, res, next) {
+	app.post('/publish/:catalog/:draftId', isLoggedIn, function(req, res, next) {
 		//update document
 		var doc = req.doc;
 		var body = req.body;
-		var col = req.collection;
+		var col = req.catalog;
 		if (!req.can_publish)
-			next('You do not have permission to publish this document');
-		if (col.owners.indexOf(user.name) === -1)
-			next('You do not have permission to publish to this collection');
+			return next(new Error('You do not have permission to publish this document'));
+		if (req.is_collection && col.owners.indexOf(user.name) === -1)
+			return next(new Error('You do not have permission to publish to this collection'));
+		else if (!req.is_collection && col.name !== req.user.name)
+			return next(new Error('You do not have permission to publish to this user'));
+
+		console.log(body);
 
 		var status = body.status || (col.hidden ? 'unlisted' : 'public');
 
 		doc.title = body.title;
-		doc.catalog = col.name;
+		doc.catalog = req.params.catalog;
 		doc.slug = body.slug;
-		doc.fixed_title = body.fixed_title;
-		doc.fixed_slug = body.fixed_slug;
 		doc.text = body.text;
-		doc.data = body.data;
+		//doc.data = body.data;
 		doc.status = status;
-		doc.version = parseInt(body.version);
+		//doc.version = parseInt(body.version);
 		doc.save(function(err) {
 			if (err) return next(err);
 			res.send({message:'Document updated'});
 		});
 	});
 
-	app.post('/submit/:collection', isLoggedIn, function(req, res, next) {
+	app.post('/submit/:catalog/:draftId', isLoggedIn, function(req, res, next) {
 		//submit document for publication
-		var col = req.collection;
+		var col = req.catalog;
+		var doc = req.doc;
 		var user = req.user;
 		var body = req.body;
+		if (!req.can_publish)
+			next('You do not have permission to submit this document');
+		if (!req.is_collection)
+			return next(new Error('Cannot submit document to a user'));
 		if (col.writers.indexOf(user.name) === -1 &&
 			col.owners.indexOf(user.name) === -1)
-			next('You do not have permission to submit to this collection');
+			return next(new Error('You do not have permission to submit to this collection'));
 
 		var sub = new Submission();
 		sub._id = genId();
-		sub.document_id = body.document_id;
-		sub.catalog = req.params.collection;
+		sub.document_id = doc.id;
+		sub.catalog = req.params.catalog;
 		sub.title = body.title;
 		sub.slug = body.slug;
 		sub.text = body.text;
@@ -177,6 +215,34 @@ module.exports = function(app, passport, share) {
 		});
 	});
 
+	app.param('catalog', function(req, res, next, name) {
+		if (name[0] === '@') {
+			User.findOne({name:name.slice(1)}, function(err, user) {
+				if (err) {
+					next(err);
+				} else if (user) {
+					req.catalog = user;
+					req.is_collection = false;
+					next();
+				} else {
+					next(new Error('failed to load user'));
+				}
+			});
+		} else {
+			Collection.findOne({ 'name' :  name }, function(err, collection) {
+    			if (err) {
+      				next(err);
+    			} else if (collection) {
+      				req.catalog = collection;
+      				req.is_collection = true;
+      				next();
+    			} else {
+      				next(new Error('failed to load collection'));
+    			}
+  			});
+		}
+	});
+
 	app.param('submission', function(req, res, next, id) {
 		Submission.findOne({_id: id}, function(err, sub) {
 			if (err) return next(err);
@@ -184,7 +250,7 @@ module.exports = function(app, passport, share) {
 		});
 	})
 
-	app.post('/publish/:collection/:submission', isLoggedIn, function(req, res, next) {
+	app.post('/accept/:collection/:submission', isLoggedIn, function(req, res, next) {
 		var col = req.collection;
 		var user = req.user;
 		var sub = req.submission;
@@ -192,7 +258,7 @@ module.exports = function(app, passport, share) {
 			next('You do not have permission to publish to this collection');
 		Document.findOne({_id:sub.document_id}, function(err, doc) {
 			if (err) return next(err);
-			doc.catalog = req.params.collection;
+			doc.catalog = req.params.catalog;
 			doc.title = sub.title;
 			doc.slug = sub.slug;
 			doc.text = sub.text;
