@@ -654,7 +654,7 @@ module.exports = function(app, passport, share) {
 	app.get('/@:name', function(req, res, next) {
 		Document.find({
   			'catalog':('@' + req.collection.name),
-  			'hidden':false //public
+  			'status':'public',
   		}, function(err, docs){
   			if (err) return next(err);
     		res.render('profile', {

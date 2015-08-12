@@ -5,10 +5,13 @@ block header
   include ./includes/header.jade
 
 block content
-    .headline-bg.about-headline-bg
-    // //headline-bg
-    section.story-section.section.section-on-bg
-      h2.title.container.text-center Your Profile
-      h1= user.name
-      .story-container.container.text-center
-        .story-container-inner
+  .content
+    h1= user.name
+    if (stories.length > 0)
+      each story in stories
+        .story-block
+          h3.title
+            a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+          a(href="/edit/#{story._id}")= story.slug
+          .meta-line
+            span #{moment(story.updated).fromNow()}  
