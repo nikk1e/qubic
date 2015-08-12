@@ -210,7 +210,7 @@ module.exports = function(app, passport, share) {
 		sub.slug = body.slug;
 		sub.text = body.text;
 		sub.data = body.data;
-		sub.version = parseInt(body.version);
+		//sub.version = parseInt(body.version);
 		sub.submitted_by = req.user.name;
 		sub.save(function(err) {
 			if (err) return next(err);
@@ -510,25 +510,37 @@ module.exports = function(app, passport, share) {
 	});
 
 	app.post('/new-collection', isLoggedIn, function(req, res) {
-		var collection = new Collection();
+		var col = new Collection();
+		var body = req.body;
 		//TODO: validate name
-		collection.name = req.body.name.replace(' ','-');
-		collection.title = req.body.title;
-		collection.description = req.body.description;
+		col.name = req.body.name.replace(' ','-');
+		col.title = req.body.title;
+		col.description = req.body.description;
 		col.owners = body.owners.split(/ *[,;] */g);
 		if (col.owners.length === 0)
 			col.owners.push(req.user.name);
 		col.writers = body.writers.split(/ *[,;] */g);
 		col.readers = body.readers.split(/ *[,;] */g);
-		collection.save(function (err) {
+		col.save(function (err) {
     		if (err) {
     			req.flash('new-collection', err);
       			return res.render('new-collection', {
-      				collection:collection
+      				collection:col
       			});
     		}
-    		res.redirect(collection.name);
+    		res.redirect(col.name);
   		});
+	});
+
+	app.get('/:collection/submissions', isLoggedIn, function(req, res, next) {
+		Submission.find({catalog: req.params.collection}, function(err, subs) {
+			if (err) return next(new Error('Cannot get submissions'));
+			//subs = subs || [];
+			res.render('submissions', {
+				collection: req.collection,
+				submissions: subs,
+			});
+		})
 	});
 
 	app.get('/:collection/edit', isLoggedIn, function(req, res, next) {

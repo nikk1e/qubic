@@ -5,6 +5,7 @@ var createClass = friar.createClass;
 var Toolbar = require('./toolbar');
 var Sidebar = require('./sidebar');
 var Slate = require('slatejs');
+var plugins = Slate.plugins;
 var Editor = Slate.editor.Editor;
 
 function findTitle(list) {
@@ -281,7 +282,12 @@ var Wrap = createClass({
 		this.editor = Editor({
 			id: "preview",
 			store: p.store,
-			plugins: p.plugins,
+			plugins: [
+				plugins.base,
+				plugins.table,
+				plugins.qube,
+				plugins.encryption,
+			],
 		});
 		var title = findTitle(s.doc);
 		var subtitle = findSubtitle(s.doc);

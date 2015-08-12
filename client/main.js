@@ -1,5 +1,6 @@
 var Slate = require('slatejs');
 var Wrap = require('./wrap');
+window.Wrap = Wrap;
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -44,12 +45,7 @@ sharedoc.whenReady(function() {
 		docId: window.docId,
 		owns: window.owns || [],
 		status: window.docStatus || 'draft',
-		plugins:[
-		plugins.base,
-		plugins.table,
-		plugins.qube,
-		plugins.encryption,
-	]});
+	});
 
 	e.friar.renderComponent(wrap, wrapElm)
 });
