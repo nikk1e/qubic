@@ -50,16 +50,16 @@ block content
                   h3 People
                 each person in people
                   .person
-                    h4
+                    h3.title
                       a(href="/@#{person.name}")= (person.displayName || person.name)
-                    p= person.bio
+                    a(href="/@#{person.name}")= person.bio
             if collections && collections.length > 0
               .people
                 .heading.top-border
                   h3 Collections
                 each collection in collections
                   .collection
-                    h4
+                    h3.title
                       a(href="/#{collection.name}")= collection.title
-                    p= collection.description
+                    a(href="/#{collection.name}")= collection.description
   

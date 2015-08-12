@@ -33,9 +33,9 @@ block content
                   h3
                 each collection in collections
                   .collection
-                    h4
+                    h3.title
                       a(href="/#{collection.name}")= collection.title
-                    p= collection.description
+                    a(href="/#{collection.name}")= collection.description
             else
               .heading.top-border
                 h3

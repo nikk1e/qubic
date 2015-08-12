@@ -33,9 +33,9 @@ block content
                   h3
                 each person in people
                   .person
-                    h4
+                    h3.title
                       a(href="/@#{person.name}")= (person.displayName || person.name)
-                    p= person.bio
+                    a(href="/@#{person.name}")= person.bio
             else
               .heading.top-border
                 h3

@@ -74,12 +74,16 @@ h1,h2,h3,h4,h5,h6 {
 	outline: none;
 }
 
-.story-block {
+.story-block,
+.person,
+.collection {
 	border-bottom: 1px solid #eee;
 	padding-bottom: 20px;
 }
 
-.story-block .title {
+.story-block .title,
+.person .title,
+.collection .title {
 	line-height: 1.3;
 	font-size: 24px;
 	margin-bottom: 0;
@@ -91,7 +95,9 @@ span.dot {
 	font-weight: 500;
 }
 
-.story-block a {
+.story-block a,
+.person a,
+.collection a {
 	text-decoration: none;
 	color: #444;
 }
@@ -100,7 +106,9 @@ span.dot {
 	color: #ccc;
 }
 
-.story-block:last-child {
+.story-block:last-child,
+.collection:last-child,
+.person:last-child {
 	border-bottom: 0;
 }
 
