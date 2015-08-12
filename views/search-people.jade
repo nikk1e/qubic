@@ -1,0 +1,44 @@
+extends layout
+
+block header
+  .toolbar
+    a.btn.pull-left(href="/")
+      em.fa.fa-cube
+    a.btn.pull-right(href="/me/models")
+      em.fa.fa-user
+    a.btn.pull-right(href="/new")
+      em.fa.fa-plus
+
+block content
+  .content.wide.search
+    header.col
+      form()
+        input.search-input(type="search", name='q',value="#{q}",placeholder='Search Qubic',autofocus=true)
+    if q
+      .pure-g
+        .pure-u-4-24
+          .col
+            ul.nav-v
+              li
+                a(href="/search?q=#{q}") All
+              li
+                a.active(href="/search/people?q=#{q}") People
+              li
+                a(href="/search/collections?q=#{q}") Collections
+        .pure-u-14-24.documents
+          .col
+            if people && people.length > 0
+              .people
+                .heading.top-border
+                  h3
+                each person in people
+                  .person
+                    h4
+                      a(href="/@#{person.name}")= (person.displayName || person.name)
+                    p= person.bio
+            else
+              .heading.top-border
+                h3
+              .excuse
+                p We couldn't find any people.
+  

@@ -15,6 +15,65 @@ h1,h2,h3,h4,h5,h6 {
 	color: rgb(75, 75, 75);
 }
 
+.search .nav-v {
+	padding: 0;
+	margin: 0;
+}
+
+.search .nav-v li {
+	list-style: none;
+	display: block;
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+.excuse {
+	text-align: center;
+	margin-top: 40px;
+	margin-bottom: 80px;
+	color: #bbb;
+}
+
+.search .nav-v a {
+	border-top: 1px solid #ccc;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	width: 100%;
+	text-decoration: none;
+	color: #444;
+	font-weight: 300;
+	display: inline-block;
+	letter-spacing: .1em;
+}
+
+.search .heading h3 {
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: .1em;
+}
+
+.search .nav-v a.active {
+	border-top: 1px solid #000;
+	font-weight: 400;
+	color: #000;
+}
+
+.search .nav-v a.active:after {
+  content: "\f054";
+  float: right;
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  margin:0px 0px 0px 10px;
+  text-decoration:none;
+}
+
+.search .search-input {
+	border: 0;
+	font-size: 50px;
+	outline: none;
+}
+
 .story-block {
 	border-bottom: 1px solid #eee;
 	padding-bottom: 20px;
@@ -53,14 +112,32 @@ sup, sub {
 }
 sub { top: 0.4em; }
 
+.search header {
+	margin: 40px 0;
+}
+
 .shareForm {
 	padding-bottom: 1em;
 	border-bottom: 1px solid #ddd;
 }
 
+.top-border {
+	border-top: 1px solid #ddd;
+}
+
+.col {
+	padding-right: 20px;
+	padding-left: 20px;
+	position: relative;
+}
+
 .content {
 	margin: auto;
 	max-width: 800px;
+}
+
+.content.wide {
+	max-width: 1140px !important;
 }
 
 .sidebar {
