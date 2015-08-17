@@ -60,6 +60,7 @@ module.exports = function(app, passport, share) {
 		//check permissions
 		Document.findOne({ _id :  id }, function(err, doc) {
     		if (err) return next(err);
+    		if (!doc) return next(new Error('could not find doc ' + id));
     		req.doc = doc;
     		if (doc.catalog[0] === '@') {
     			var uname = doc.catalog.slice(1);
