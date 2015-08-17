@@ -46,7 +46,7 @@ router.get('/models/drafts', function(req, res, next) {
   Document.find({
     'catalog':('@' + req.user.name),
     'status':'draft',
-  }, 'title slug created', function(err, docs){
+  }, 'title slug created updated', function(err, docs){
     res.render('me/stories-draft', { stories:(docs || []) });
   });
 });
@@ -55,7 +55,7 @@ router.get('/models/public', function(req, res, next) {
   Document.find({
   	'catalog':('@' + req.user.name),
   	'status':'public',
-  }, 'title slug created', function(err, docs){
+  }, 'title slug created updated', function(err, docs){
     res.render('me/stories-public', { stories:(docs || []) });
   });
 });
@@ -64,7 +64,7 @@ router.get('/models/unlisted', function(req, res, next) {
   Document.find({
     'catalog':('@' + req.user.name),
     'status':'unlisted',
-  }, 'title slug created', function(err, docs){
+  }, 'title slug created updated', function(err, docs){
     res.render('me/stories-unlisted', { stories:(docs || []) });
   });
 });
@@ -78,7 +78,7 @@ router.get('/collections', function(req, res, next) {
     {name: { $in: user.following }},
   ]}, function(err, collections) {
     collections = collections || [];
-    var owns = [];
+    var owns = ['@' + user.name];
     var writes = [];
     var reads = [];
     var follows = [];

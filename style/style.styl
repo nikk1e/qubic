@@ -1,6 +1,7 @@
 body {
 	font-family: 'Roboto', arial, sans-serif;
 	color: #114;
+	font-weight: 300;
 	line-height: 28.5px;
 	font-size: 17px;
 }
@@ -14,6 +15,103 @@ h1,h2,h3,h4,h5,h6 {
 	color: rgb(75, 75, 75);
 }
 
+.search .nav-v {
+	padding: 0;
+	margin: 0;
+}
+
+.search .nav-v li {
+	list-style: none;
+	display: block;
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+.excuse {
+	text-align: center;
+	margin-top: 40px;
+	margin-bottom: 80px;
+	color: #bbb;
+}
+
+.search .nav-v a {
+	border-top: 1px solid #ccc;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	width: 100%;
+	text-decoration: none;
+	color: #444;
+	font-weight: 300;
+	display: inline-block;
+	letter-spacing: .1em;
+}
+
+.search .heading h3 {
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: .1em;
+}
+
+.search .nav-v a.active {
+	border-top: 1px solid #000;
+	font-weight: 400;
+	color: #000;
+}
+
+.search .nav-v a.active:after {
+  content: "\f054";
+  float: right;
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  margin:0px 0px 0px 10px;
+  text-decoration:none;
+}
+
+.search .search-input {
+	border: 0;
+	font-size: 50px;
+	outline: none;
+}
+
+.story-block,
+.person,
+.collection {
+	border-bottom: 1px solid #eee;
+	padding-bottom: 20px;
+}
+
+.story-block .title,
+.person .title,
+.collection .title {
+	line-height: 1.3;
+	font-size: 24px;
+	margin-bottom: 0;
+}
+
+span.dot {
+	margin-left: 0.4em;
+	margin-right: 0.4em;
+	font-weight: 500;
+}
+
+.story-block a,
+.person a,
+.collection a {
+	text-decoration: none;
+	color: #444;
+}
+
+.story-block .meta-line {
+	color: #ccc;
+}
+
+.story-block:last-child,
+.collection:last-child,
+.person:last-child {
+	border-bottom: 0;
+}
+
 /* fix line height change due to sub/sup */
 sup, sub {
    vertical-align: baseline;
@@ -22,29 +120,278 @@ sup, sub {
 }
 sub { top: 0.4em; }
 
+.search header {
+	margin: 40px 0;
+}
+
 .shareForm {
 	padding-bottom: 1em;
 	border-bottom: 1px solid #ddd;
 }
 
+.top-border {
+	border-top: 1px solid #ddd;
+}
+
+.col {
+	padding-right: 20px;
+	padding-left: 20px;
+	position: relative;
+}
+
 .content {
 	margin: auto;
-	max-width: 700px;
+	max-width: 800px;
+}
+
+.content.wide {
+	max-width: 1140px !important;
 }
 
 .sidebar {
 	position:absolute;
 	width: 300px;
+	font-family: "Open Sans","Clear Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+top: 0;
+left: 0;
+bottom: 0;
+z-index: 1;
+width: 300px;
+color: #364149;
+background: #fafafa;
+border-right: 1px solid rgba(0,0,0,0.07);
+-webkit-transition: left 250ms ease;
+-moz-transition: left 250ms ease;
+-o-transition: left 250ms ease;
+transition: left 250ms ease;
+}
+
+.none .sidebar {
+	left: -300px;
+}
+
+ul.summary .fa {
+  position: absolute;
+  right: 9px;
+}
+
+ul.summary {
+	position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+overflow-y: auto;
+list-style: none;
+margin: 0;
+padding: 0;
+-webkit-transition: top 250ms ease;
+-moz-transition: top 250ms ease;
+-o-transition: top 250ms ease;
+transition: top 250ms ease;
+}
+
+.info {
+	position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+overflow-y: auto;
+list-style: none;
+margin: 0;
+padding: 0;
+-webkit-transition: top 250ms ease;
+-moz-transition: top 250ms ease;
+-o-transition: top 250ms ease;
+transition: top 250ms ease;
+}
+
+.history {
+	position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+overflow-y: auto;
+list-style: none;
+margin: 0;
+padding: 0;
+-webkit-transition: top 250ms ease;
+-moz-transition: top 250ms ease;
+-o-transition: top 250ms ease;
+transition: top 250ms ease;
+}
+
+ul.summary li {
+	list-style:none
+}
+
+ul.summary li a {
+display: block;
+padding: 10px 15px;
+border-bottom: 0;
+color: #364149;
+background: transparent;
+text-overflow: ellipsis;
+overflow: hidden;
+white-space: nowrap;
+position: relative;
+text-decoration:none;
+}
+
+.sidebar {
+font-weight: 300;
+font-size: 14px;
+line-height: 16px;
+}
+
+.book-content .publish {
+	border-bottom: 1px solid #ccc;
+padding-bottom: 30px;
+margin-bottom: 50px;
+}
+
+.book .sidebar .book-search {
+    padding: 6px;
+    background: transparent;
+    position: absolute;
+    top: -50px;
+    left: 0;
+    right: 0;
+    -webkit-transition: top 250ms ease;
+    -moz-transition: top 250ms ease;
+    -o-transition: top 250ms ease;
+    transition: top 250ms ease
+}
+
+.book .sidebar .book-search input,
+.book .sidebar .book-search input:focus,
+.book .sidebar .book-search input:hover {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    outline: 0;
+    line-height: 22px;
+    padding: 7px 4px;
+    color: inherit
+}
+
+.book .sidebar.with-search .book-search {
+    top: 0
+}
+
+.book .sidebar.with-search ul.summary,
+.book .sidebar.with-search .info,
+.book .sidebar.with-search .history {
+    top: 50px
 }
 
 .book-content {
-	position:absolute;
-	left: 300px;
-	right: 0;
-	bottom: 0;
-	top: 0;
+position:absolute;
+left: 300px;
+right: 0;
+bottom: 0;
+top: 0;
+overflow-y: auto;
+color: #000;
+background: #fff;
+-webkit-transition: left 250ms ease;
+-moz-transition: left 250ms ease;
+-o-transition: left 250ms ease;
+transition: left 250ms ease;
 }
 
+.none .book-content {
+	left: 0px;
+}
+
+.toolbar {
+	height: 50px;
+	padding: 0 8px;
+}
+
+.toolbar .btn {
+height: 50px;
+color: #ccc;
+padding: 0 15px;
+line-height: 50px;
+}
+
+.toolbar .btn:hover {
+color: #444;
+}
+
+.toolbar h1 {
+color: #444;
+	margin: 0;
+font-size: 20px;
+font-weight: 200;
+text-align: center;
+line-height: 50px;
+opacity: 0;
+-webkit-transition: opacity ease .4s;
+-moz-transition: opacity ease .4s;
+-o-transition: opacity ease .4s;
+transition: opacity ease .4s;
+-webkit-transition: opacity .2s ease;
+-moz-transition: opacity .2s ease;
+-o-transition: opacity .2s ease;
+transition: opacity .2s ease;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.toolbar:hover h1 {
+	opacity: 1;
+}
+
+th, b, strong {
+	font-weight: 500;
+}
+
+
+.book-content .publish {
+	display: none;
+}
+
+.book-content.with-publish .publish {
+	display: block;
+}
+
+
+.nav-tab {
+	padding: 0;
+	display: block;
+	height: 50px;
+	border-top: 1px solid #ccc;
+}
+
+.nav-tab li {
+display: inline-block;
+margin-right: 20px;
+margin-top: -1px;
+}
+
+.nav-tab li.active {
+	border-top: 1px solid #444;
+}
+
+.nav-tab li.active a {
+	color: #444;
+}
+
+.nav-tab li a {
+	text-decoration: none;
+	font-size: 11px;
+	text-transform: uppercase;
+	color: #ccc;
+	display: inline-block;
+	padding: 10px 0;
+}
 
 .icon_link {
 	display: block;

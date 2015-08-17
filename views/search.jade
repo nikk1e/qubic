@@ -1,34 +1,65 @@
 extends layout
 
+block header
+  .toolbar
+    a.btn.pull-left(href="/")
+      em.fa.fa-cube
+    a.btn.pull-right(href="/me/models")
+      em.fa.fa-user
+    a.btn.pull-right(href="/new")
+      em.fa.fa-plus
+
 block content
-  form()
-    input(name='q',value="#{q}",placeholder='Search Qubic')
-  if documents
-    h3 Models
-    if documents.length > 0
-      each doc in documents
-        .story
-          h4= doc.title
-          p= doc.slug
-    else
-      p No models found.
-  if people
-    h3 People
-    if people.length > 0
-      each person in people
-        .person
-          h4
-            a(href="/@#{person.name}")= person.displayName
-          p= person.bio
-    else
-      p No collections found.
-  if collections
-    h3 Collections
-    if collections.length > 0
-      each collection in collections
-        .collection
-          h4
-            a(href="/#{collection.name}")= collection.title
-          p= collection.description
-    else
-      p No collections found.
+  .content.wide.search
+    header.col
+      form()
+        input.search-input(type="search", name='q',value="#{q}",placeholder='Search Qubic',autofocus=true)
+    if q
+      .pure-g
+        .pure-u-4-24
+          .col
+            ul.nav-v
+              li
+                a.active(href="/search?q=#{q}") All
+              li
+                a(href="/search/people?q=#{q}") People
+              li
+                a(href="/search/collections?q=#{q}") Collections
+        .pure-u-14-24.documents
+          .col
+            if documents && documents.length > 0
+              .heading.top-border
+                h3 Models
+              each story in documents
+                .story-block
+                  h3.title
+                    a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+                  a(href="/edit/#{story._id}")= story.slug
+                  .meta-line
+                    span #{moment(story.updated).fromNow()}  
+            else
+              .heading.top-border
+                h3
+              .excuse
+                p We couldn't find any models.
+        .pure-u-6-24
+          .col
+            if people && people.length > 0
+              .people
+                .heading.top-border
+                  h3 People
+                each person in people
+                  .person
+                    h3.title
+                      a(href="/@#{person.name}")= (person.displayName || person.name)
+                    a(href="/@#{person.name}")= person.bio
+            if collections && collections.length > 0
+              .people
+                .heading.top-border
+                  h3 Collections
+                each collection in collections
+                  .collection
+                    h3.title
+                      a(href="/#{collection.name}")= collection.title
+                    a(href="/#{collection.name}")= collection.description
+  

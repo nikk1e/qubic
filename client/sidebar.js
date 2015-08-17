@@ -5,12 +5,32 @@ var createClass = friar.createClass;
 var ot = require('ot-sexpr');
 var List = ot.List;
 
-function toHeaders(list, stack) {
+function toHeaders(list, filter, stack, num) {
 	stack = stack || [];
-	if (!(list instanceof List))
+	num = num || [0,0,0,0,0,0,0];
+	level = 0;
+	for (var i = num.length - 1; i >= 0; i--) {
+		if (num[i] > 0) {
+			level = i;
+			break;
+		}
+	};
+
+	//console.log(list)
+	//console.log(list instanceof List)
+
+	if (!(typeof list === 'object'))
 		return stack;
 
-	var h = this.head().sym;
+	function clearAfter(l) {
+		for (var i = num.length - 1; i > l; i--)
+			num[i] = 0;
+	}
+
+	//console.log("toHeaders")
+	//console.log(list.head)
+	var h = list.head().sym;
+	var show = !(filter && !(filter.test(list.textContent())))
 	switch (h) {
 		case 'h1':
 		case 'h2':
@@ -18,46 +38,129 @@ function toHeaders(list, stack) {
 		case 'h4':
 		case 'h5':
 		case 'h6':
-			stack.push({level:parseInt(h.slice(1)), text:this.textContent()});
+		    var lvl = parseInt(h.slice(1));
+		    if (lvl < level) clearAfter(lvl);
+		    num[lvl]++;
+		    if (show)
+				stack.push({level:lvl, text:list.textContent(), id:list.id, num:num.slice(1,lvl+1).join('.')});
+			//console.log(stack)
+			break;
 		case 'encrypted':
-			stack.push({level:0, text:'Encrypted'});
+			num[0]++;
+			clearAfter(0);
+			if (show)
+				stack.push({level:0, text:'Section', id:list.id, num:Roman(num[0]), tag:'lock'});
 			break;
 		case 'section':
 		case 'encrypt':
-			stack.push({level:0, text:(h === 'encrypt' ? 'Encrypted' : 'Section')});
+		    num[0]++;
+			clearAfter(0);
+			var el = {level:0, text:'Section', id:list.id, num:Roman(num[0])}
+			if (h === 'encrypt')
+				el.tag ='unlock';
+			if (show)
+				stack.push(el);
 			//fall through
 		case 'doc':
-			for (var i = 1; i < this.values.length; i++) {
-				var child = this.values[i];
-				toHeaders(child, stack);
+			for (var i = 1; i < list.values.length; i++) {
+				var child = list.values[i];
+				toHeaders(child, filter, stack, num);
 			};
 			break;
 		default:
+			if (filter && show)
+				stack.push({level:6, text:list.textContent(), id:list.id, num:''});
 			break;
 	}
 	return stack;
 }
 
+function toRef(id) {
+	return "#clay:" + id.toString(36);
+}
+
+//really noddy but will do for now
+var ROMAN = ['0','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'];
+function Roman(n) {
+	return ROMAN[n] || n;
+}
+
+var Summary = createClass({
+	render: function() {
+		var p = this.props;
+		var doc = p.doc;
+		var filter;
+		if (p.filter && p.filter.length >= 3)
+			try {
+				filter = new RegExp(p.filter,'ig');
+			} catch(e) {
+				console.log(e);
+			}
+		var hs = toHeaders(doc, filter);
+		var cs = hs.map(function(it) {
+			var cels = [
+			DOM.span({},it.text),
+			]
+			if (it.level === 0)
+				cels.push(DOM.span({},' ' + it.num));
+			else
+				cels.unshift(DOM.span({}, it.num + ' '));
+			if (it.tag) {
+				cels.push(DOM.span({className:("fa fa-" + it.tag)},""));
+			}
+			return DOM.li({},[
+				DOM.a({href:toRef(it.id)},cels),
+				]);
+		})
+		return DOM.ul({className:"summary"},cs);
+	},
+});
+
+var Info = createClass({
+	render: function() {
+		return DOM.div({className:"info"},"Info goes here");
+	}
+});
+
+var History = createClass({
+	render: function() {
+		return DOM.div({className:"history"},"History goes here");
+	}
+});
 
 var Sidebar = createClass({
-	getInitialState: function() {
-		return {
-			doc: this.props.store.document()
-		};
-	},
-	didMount: function() {
-		this.props.store.on('change', this.onChange);
-	},
-	willUnmount: function() {
-		this.props.store.removeListener('change', this.onChange);
-	},
-	onChange: function() {
-		this.setState({
-			doc: this.props.store.document()
-		});
-	},
 	render: function() {
-		return DOM.div({className:'sidebar'},"THis is a sidebar");
+		var doc = this.props.doc;
+		
+		var p = this.props;
+		var showSearch = !!p.search;
+		var cname = 'sidebar';
+		if (showSearch && p.show === 'summary')
+			cname += ' with-search';
+
+		var Show = Summary;
+		switch (p.show) {
+			case 'info':
+				Show = Info;
+				break;
+			case 'history':
+				Show = History;
+				break;
+		}
+		
+		return DOM.div({id:this.props.id, className:cname},[
+			DOM.div({className:"book-search"},[
+				DOM.input({
+					type:"text",
+					placeholder:"Type to search",
+					className:"form-control",
+					//onChange: p.onSearchChange,
+					onKeyup: p.onSearchChange,
+					value: p.filter,
+					}),
+				]),
+			Show({filter:p.filter, doc:doc}),
+			]);
 	},
 });
 

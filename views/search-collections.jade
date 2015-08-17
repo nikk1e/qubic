@@ -1,0 +1,44 @@
+extends layout
+
+block header
+  .toolbar
+    a.btn.pull-left(href="/")
+      em.fa.fa-cube
+    a.btn.pull-right(href="/me/models")
+      em.fa.fa-user
+    a.btn.pull-right(href="/new")
+      em.fa.fa-plus
+
+block content
+  .content.wide.search
+    header.col
+      form()
+        input.search-input(type="search", name='q',value="#{q}",placeholder='Search Qubic',autofocus=true)
+    if q
+      .pure-g
+        .pure-u-4-24
+          .col
+            ul.nav-v
+              li
+                a(href="/search?q=#{q}") All
+              li
+                a(href="/search/people?q=#{q}") People
+              li
+                a.active(href="/search/collections?q=#{q}") Collections
+        .pure-u-14-24.documents
+          .col
+            if collections && collections.length > 0
+              .collections
+                .heading.top-border
+                  h3
+                each collection in collections
+                  .collection
+                    h3.title
+                      a(href="/#{collection.name}")= collection.title
+                    a(href="/#{collection.name}")= collection.description
+            else
+              .heading.top-border
+                h3
+              .excuse
+                p We couldn't find any collections.
+  

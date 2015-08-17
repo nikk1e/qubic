@@ -11,12 +11,11 @@ var documentSchema = mongoose.Schema({
 	catalog: String, //<collection.name> or @<user.name>
 	title: String,
 	slug: String,
-	fixed_title: {type:Boolean, default:false},
-	fixed_slug: {type:Boolean, default:false},
 	text: String,
 	data: String, //snapshot
 	version: { type: Number, default: 0 },
 	created: { type: Date, default: Date.now },
+	updated: { type: Date, default: Date.now },
 	status: { type: String, default: 'draft' },
 });
 
@@ -33,5 +32,11 @@ documentSchema.index({
 	}
 });
 documentSchema.index({catalog: 1, status: 1});
+
+documentSchema.pre('save', function(next){
+  now = new Date();
+  this.updated = now;
+  next();
+});
 
 module.exports = mongoose.model('Document', documentSchema);

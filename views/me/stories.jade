@@ -1,26 +1,19 @@
 extends layout
 
 block content
-  h1 Your models
-  
-  ul
-    li
-      a(href="drafts")
-        if (req.counts.draft > 0)
-          span= req.counts.draft
-          | 
-        | Drafts
-    li
-      a(href="public")
-        if (req.counts.public > 0)
-          span= req.counts.public
-          | 
-        | Public
-    li
-      a(href="unlisted")
-        if (req.counts.unlisted > 0)
-          span= req.counts.unlisted
-          | 
-        | Unlisted
-  
-  block stories
+  .content
+    block link
+      -var selected = 'draft';
+    -var menu = {'draft':'Drafts','public':'Public','unlisted':'Unlisted'};
+    h1 Your models
+    
+    ul.nav-tab.content
+      each val, key in menu
+        li(class=selected === key ? "active" : "")
+          a(href="#{val.toLowerCase()}")
+            if (req.counts[key] > 0)
+              span= req.counts[key]
+              | 
+            | #{val}
+    
+    block stories

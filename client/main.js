@@ -1,17 +1,16 @@
+var Slate = require('slatejs');
+var Wrap = require('./wrap');
+window.Wrap = Wrap;
+
 document.addEventListener('DOMContentLoaded', function () {
-    var Slate = window.Slate = require('slatejs');
 
-    var Sidebar = require('./sidebar');
-    var Toolbar = require('./toolbar');
-
-    var preview = document.getElementById('preview');
-    var sidebar = document.getElementById('sidebar');
-    var toolbar = document.getElementById('toolbar');
+	var wrapElm = document.getElementById('wrap');
     var plugins = Slate.plugins;
     var Selection = Slate.Selection;
 	var Region = Slate.Region;
 
 	var e = Slate.editor;
+
 
 var dummy = new BCSocket(null, {reconnect: true});
 dummy.canSendJSON = false; //need this because goog.json.serialize doesn't call toJSON
@@ -30,6 +29,8 @@ var doc = '(doc (section (h1 "") (p "")))'
 
 var sel = new Selection([new Region(7,7)]); //, new Region(298,348), new Region(380), new Region(495,400), new Region(870,830), new Region(1130,1070), new Region(1200,1300), new Region(1743+8,1734)]);
 
+var catalog = window.catalog || 'unknown';
+
 sharedoc.whenReady(function() {
 	if (!sharedoc.type)
 		sharedoc.create('sexpr', doc);
@@ -38,18 +39,15 @@ sharedoc.whenReady(function() {
 	store = new Slate.Store(sharedoc.createContext());
 
 	store.select(sel);
-	editor = e.Editor({store: store, plugins:[
-		plugins.base,
-		plugins.table,
-		plugins.qube,
-		plugins.encryption,
-	]});
 
-	var sbar = Sidebar({store:store});
-	var tbar = Toolbar({store:store});
-	e.friar.renderComponent(sbar, sidebar);
-	e.friar.renderComponent(tbar, toolbar);
-	e.friar.renderComponent(editor, preview);
+	window.wrap = Wrap({store: store,
+		catalog: catalog,
+		docId: window.docId,
+		owns: window.owns || [],
+		status: window.docStatus || 'draft',
+	});
+
+	e.friar.renderComponent(wrap, wrapElm)
 });
 
 

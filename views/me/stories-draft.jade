@@ -3,10 +3,12 @@ extends stories
 block stories
   if (stories.length > 0)
     each story in stories
-      .draft
-        a(href="/edit/#{story._id}")= (story.title || 'Draft Story')
-        p= story.slug
-        span= story.created
+      .story-block
+        h3.title
+          a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+        a(href="/edit/#{story._id}")= story.slug
+        .meta-line
+          span Last edited #{moment(story.updated).fromNow()}
   else
     p You have no drafts.
     p TODO: add inspiration link.

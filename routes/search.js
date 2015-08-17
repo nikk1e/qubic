@@ -36,7 +36,7 @@ function documents(str, limit) {
   ).sort(
     { score: { $meta: "textScore" } }
   ).limit(limit || 20
-  ).select('catalog title slug created'
+  ).select('catalog title slug created updated'
   ).lean(
   ).exec();
 }
@@ -69,14 +69,28 @@ router.get('/', function(req, res, next) {
 router.get('/people', function(req, res, next) {
   var q = req.query.q || '';
   people(q).then(function(ps) {
-  	res.send(ps);
+    var result = {
+      q:q,
+      people: ps
+    };
+  	if (req.xhr)
+      res.send(result);
+    else
+      res.render('search-people', result);
   })
 });
 
 router.get('/collections', function(req, res, next) {
   var q = req.query.q || '';
   collections(q).then(function(ps) {
-  	res.send(ps);
+  	var result = {
+      q:q,
+      collections: ps
+    };
+    if (req.xhr)
+      res.send(result);
+    else
+      res.render('search-collections', result);
   })
 });
 
