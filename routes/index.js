@@ -658,7 +658,7 @@ module.exports = function(app, passport, share) {
 
 	function show_revision(req, res, next) {
 		//req.collection -- might be a user
-		res.send('TODO: render document revision');
+		res.send('(doc (section (code "A = 10") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
 		//if no rev number then it should get the published version
 		//if it was an accept application/qube request then it should
 		// return the raw qube. 

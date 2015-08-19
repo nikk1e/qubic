@@ -578,9 +578,10 @@ sub span {
 	position: relative;
 }
 
-.import + .import {
+.import + .import,
+.include + .import {
 	padding-top: 0;
-	margin-top: -1em;
+	margin-top: -0.8em;
 }
 
 .import .right-icon {
@@ -599,6 +600,38 @@ sub span {
 
 .import:before {
 	content: '@import ';
+	color: #aaa;
+}
+
+.include {
+	padding: 1em;
+	background: #f4f4f4;
+	font-family: monospace;
+	position: relative;
+}
+
+.include + .include,
+.import + .include {
+	padding-top: 0;
+	margin-top: -0.8em;
+}
+
+.include .right-icon {
+	color: #aaa;
+	position: absolute;
+	right: 1em;
+}
+
+.include .right-icon:hover {
+	color: #000;
+}
+
+.include .error {
+	color: red;
+}
+
+.include:before {
+	content: '@include ';
 	color: #aaa;
 }
 
