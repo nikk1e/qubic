@@ -59,7 +59,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 .search .nav-v a.active:after {
-  content: "\f054";
+  content: "\f105";
   float: right;
   font-family: FontAwesome;
   font-weight: normal;
@@ -481,6 +481,10 @@ th, td {
 	border-bottom: 1px solid #cbcbcb;
 }
 
+pre {
+	white-space: pre-wrap;
+}
+
 thead {
 background: #e0e0e0;
 color: #000;
@@ -565,6 +569,70 @@ sub span {
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
+}
+
+.import {
+	padding: 1em;
+	background: #f4f4f4;
+	font-family: monospace;
+	position: relative;
+}
+
+.import + .import,
+.include + .import {
+	padding-top: 0;
+	margin-top: -0.8em;
+}
+
+.import .right-icon {
+	color: #aaa;
+	position: absolute;
+	right: 1em;
+}
+
+.import .right-icon:hover {
+	color: #000;
+}
+
+.import .error {
+	color: red;
+}
+
+.import:before {
+	content: '@import ';
+	color: #aaa;
+}
+
+.include {
+	padding: 1em;
+	background: #f4f4f4;
+	font-family: monospace;
+	position: relative;
+}
+
+.include + .include,
+.import + .include {
+	padding-top: 0;
+	margin-top: -0.8em;
+}
+
+.include .right-icon {
+	color: #aaa;
+	position: absolute;
+	right: 1em;
+}
+
+.include .right-icon:hover {
+	color: #000;
+}
+
+.include .error {
+	color: red;
+}
+
+.include:before {
+	content: '@include ';
+	color: #aaa;
 }
 
 pre {
