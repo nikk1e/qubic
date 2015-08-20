@@ -26,7 +26,6 @@ var store;
 
 var doc = '(doc (section (h1 "") (p "")))'
 
-
 var sel = new Selection([new Region(7,7)]); //, new Region(298,348), new Region(380), new Region(495,400), new Region(870,830), new Region(1130,1070), new Region(1200,1300), new Region(1743+8,1734)]);
 
 var catalog = window.catalog || 'unknown';
@@ -48,6 +47,7 @@ sharedoc.whenReady(function() {
 	});
 
 	e.friar.renderComponent(wrap, wrapElm)
+
 });
 
 
