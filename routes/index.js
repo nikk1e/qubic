@@ -180,7 +180,7 @@ module.exports = function(app, passport, share) {
 		doc.catalog = req.params.catalog;
 		doc.slug = body.slug;
 		doc.text = body.text;
-		//doc.data = body.data;
+		doc.data = body.data;
 		doc.status = status;
 		//doc.version = parseInt(body.version);
 		doc.save(function(err) {
@@ -657,8 +657,17 @@ module.exports = function(app, passport, share) {
 	app.get('/:collection/:title/playback/:range?', playback);
 
 	function show_revision(req, res, next) {
+		var doc = req.doc.data;
+		if (req.params.rev) {
+			//
+		}
+		if (req.xhr) {
+			res.send(doc || '(doc)');
+		} else {
+			res.render('readonly', {doc:doc});
+			//res.send('(doc (section (code "A = 11") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
+		}
 		//req.collection -- might be a user
-		res.send('(doc (section (code "A = 10") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
 		//if no rev number then it should get the published version
 		//if it was an accept application/qube request then it should
 		// return the raw qube. 
@@ -666,6 +675,25 @@ module.exports = function(app, passport, share) {
 		// the qube inline.
 		// if we have a rev number then we want that exact version
 	}
+
+	app.param('title', function(req, res, next, title) {
+		console.log(title);
+		var ts = title.split(/-/g);
+		var id = ts[ts.length-1];
+		console.log(id)
+		Document.findOne({ '_id' :  id }, function(err, doc) {
+    		if (err) {
+    			console.log(err);
+      			next(err);
+    		} else if (doc) {
+      			req.doc = doc;
+      			next();
+    		} else {
+    			console.log('failed to find doc')
+      			next(new Error('failed to load doc'));
+    		}
+  		});
+	});
 
 	app.get('/@:name/:title/:rev?', show_revision);
 	app.get('/:collection/:title/:rev?',show_revision);
