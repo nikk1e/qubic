@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "set AD_CONTROLLER=xxx&&node ./bin/www",
+    "start": "node ./bin/www",
     "build-css": "stylus style --out public/stylesheets",
     "watch-css": "nodemon -e styl -x \"npm run build-css\"",
     "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js",
@@ -15,7 +15,7 @@
     "build": "npm run build-js & npm run build-css",
     "test": "mocha",
     "dev": "DEBUG=qube-web:* NODE_ENV=development npm run watch",
-    "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& set AD_CONTROLLER=xxx&& npm run watch-win",
+    "dev-win": "set DEBUG=qube-web:*&& npm run watch-win",
     "install-windows-service": "winser -i",
     "uninstall-windows-service": "winser -r"
   },
@@ -35,6 +35,7 @@
     "express": "~4.12.2",
     "express-ntlm": "^2.1.4",
     "express-session": "^1.11.1",
+    "filesaver.js": "^0.2.0",
     "font-awesome": "^4.4.0",
     "friar": "mavxg/friar",
     "hat": "0.0.3",
