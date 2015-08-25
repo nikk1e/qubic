@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  #wrap
+  h1 TODO: Readonly render doc
+  p= doc
+  script(type="text/javascript").
+    var doc = '!{doc.replace("'","\\'")}'

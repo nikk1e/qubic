@@ -54,6 +54,7 @@
     "passport-google-oauth": "^0.2.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^1.0.3",
+    "qube": "github:mavxg/qube",
     "serve-favicon": "~2.2.0",
     "share": "^0.7.19",
     "slate0": "git://github.com/mavxg/ot-sexpr",
