@@ -1,6 +1,7 @@
 var Slate = require('slatejs');
 var Wrap = require('./wrap');
 window.Wrap = Wrap;
+window.Slate = Slate;
 
 document.addEventListener('DOMContentLoaded', function () {
 
