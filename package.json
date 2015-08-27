@@ -15,7 +15,7 @@
     "build": "npm run build-js & npm run build-css",
     "test": "mocha",
     "dev": "DEBUG=qube-web:* NODE_ENV=development npm run watch",
-    "dev-win": "set DEBUG=qube-web:*&& npm run watch-win",
+    "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& npm run watch-win",
     "install-windows-service": "winser -i",
     "uninstall-windows-service": "winser -r"
   },
