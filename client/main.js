@@ -36,7 +36,7 @@ sharedoc.whenReady(function() {
 		sharedoc.create('sexpr', doc);
 	else
 		sharedoc.snapshot = Slate.type.deserialize(sharedoc.snapshot);
-	store = new Slate.Store(sharedoc.createContext());
+	store = new Slate.Store(sharedoc.createContext(), Slate.type);
 
 	store.select(sel);
 
