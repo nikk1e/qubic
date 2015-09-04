@@ -1,8 +1,4 @@
-extends layout
-
-
-block header
-  include ./includes/header.jade
+extends ./me/layout
 
 block content
   .content
@@ -11,7 +7,7 @@ block content
       each story in stories
         .story-block
           h3.title
-            a(href="/edit/#{story._id}")= (story.title || 'Untitled')
-          a(href="/edit/#{story._id}")= story.slug
+            a(href="/#{story.catalog}/#{(story.title || '').replace(' ','_')}-#{story._id}")= (story.title || 'Untitled')            
+          a(href="/#{story.catalog}/#{(story.title || '').replace(' ','_')}-#{story._id}")= story.slug
           .meta-line
-            span #{moment(story.updated).fromNow()}  
+            span #{moment(story.updated).fromNow()}

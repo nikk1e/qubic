@@ -1,8 +1,16 @@
 extends layout
 
 block content
-  #wrap
-  h1 TODO: Readonly render doc
-  p= doc
+  #wrap  
   script(type="text/javascript").
-    var doc = '!{doc.replace("'","\\'")}'
+    var docSexpr = '!{doc.replace("'","\\'")}';
+    var docId = '#{docId}';
+    var docCollection = 'published';
+    var catalog = '#{doc.catalog}';
+    var docStatus = '#{doc.status}';
+    var defaultKey = '#{user.default_key}';
+    var owns = !{owns};
+    var writes = !{writes};
+    var docMode = 'read';
+  script(type='text/javascript' src='/javascript/utils.js')  
+  script(type='text/javascript' src='/javascript/main.js')

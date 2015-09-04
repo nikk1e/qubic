@@ -18,6 +18,10 @@ module.exports = function(app, passport, share) {
 		res.render('index');
 	});
 
+	app.get('/env/settings', isLoggedIn, function(req, res) {		
+		res.render('settings');
+	});
+
 	app.get('/play', function(req, res, next) {
 		var id = app.locals.rack();
 		var hour = app.locals.rackHour.toString(36);
@@ -123,7 +127,7 @@ module.exports = function(app, passport, share) {
 		var id = req.params.draftId;
 		var user = req.user;
 		if (!req.can_edit)
-			return next('You do not have permssion to edit this document.');
+			return next(new Error('You do not have permssion to edit this document.'));
 		res.render('edit', {
 			title: 'Qubic',
 			doc: req.doc,
@@ -196,7 +200,7 @@ module.exports = function(app, passport, share) {
 		var user = req.user;
 		var body = req.body;
 		if (!req.can_publish)
-			next('You do not have permission to submit this document');
+			next(new Error('You do not have permission to submit this document'));
 		if (!req.is_collection)
 			return next(new Error('Cannot submit document to a user'));
 		if (col.writers.indexOf(user.name) === -1 &&
@@ -259,7 +263,7 @@ module.exports = function(app, passport, share) {
 		var user = req.user;
 		var sub = req.submission;
 		if (col.owners.indexOf(user.name) === -1)
-			next('You do not have permission to publish to this collection');
+			next(new Error('You do not have permission to publish to this collection'));
 		Document.findOne({_id:sub.document_id}, function(err, doc) {
 			if (err) return next(err);
 			doc.catalog = req.params.catalog;
@@ -664,7 +668,13 @@ module.exports = function(app, passport, share) {
 		if (req.xhr) {
 			res.send(doc || '(doc)');
 		} else {
-			res.render('readonly', {doc:doc});
+			res.render('readonly', { 
+				doc:doc,
+				catalog: req.catalog,
+				owns: JSON.stringify(req.owns),
+				writes: JSON.stringify(req.writes),
+				docId: req.doc.id,
+			});
 			//res.send('(doc (section (code "A = 11") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
 		}
 		//req.collection -- might be a user
@@ -695,8 +705,8 @@ module.exports = function(app, passport, share) {
   		});
 	});
 
-	app.get('/@:name/:title/:rev?', show_revision);
-	app.get('/:collection/:title/:rev?',show_revision);
+	app.get('/@:name/:title/:rev?', myCollections, show_revision);
+	app.get('/:collection/:title/:rev?', myCollections, show_revision);
 
 	app.get('/@:name', function(req, res, next) {
 		Document.find({
@@ -735,8 +745,7 @@ module.exports = function(app, passport, share) {
 				stories: (docs || []),
 			});
   		});
-	});
-
+	});	
 };
 
 // route middleware to ensure user is logged in

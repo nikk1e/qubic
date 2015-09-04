@@ -28,7 +28,7 @@ auth(passport);
 var app = express();
 
 app.locals.auth = auth.config;
-
+app.locals.env = process.env;
 app.locals.moment = require('moment');
 
 var ot = require('ot-sexpr');
