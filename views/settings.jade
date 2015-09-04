@@ -1,0 +1,10 @@
+extends ./me/layout
+
+block content
+  .content 
+      h1 Environment Settings
+      h3 for #{env.COMPUTERNAME}
+      p
+        each val, key in env
+          if(env.hasOwnProperty(key))
+            li= key + ": " + val

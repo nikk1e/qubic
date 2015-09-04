@@ -11,4 +11,4 @@ block stories
           span Last edited #{moment(story.updated).fromNow()}
   else
     p You have no drafts.
-    p TODO: add inspiration link.
+    a(href="/new")= 'Create a new model...'

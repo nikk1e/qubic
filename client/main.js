@@ -9,47 +9,47 @@ document.addEventListener('DOMContentLoaded', function () {
     var plugins = Slate.plugins;
     var Selection = Slate.Selection;
 	var Region = Slate.Region;
-
 	var e = Slate.editor;
+	var sexprDoc;
 
+	if(docMode=='edit'){
+		var dummy = new BCSocket(null, {reconnect: true});
+		dummy.canSendJSON = false; //need this because goog.json.serialize doesn't call toJSON	
+	} else {
+		var dummy = new Slate.Dummy(Slate.ottypes);		
+		sexprDoc = { 
+			data: docSexpr, //docSexpr is set in the view
+			type: 'sexpr',
+			v: 0,
+		};		
+	}
 
-var dummy = new BCSocket(null, {reconnect: true});
-dummy.canSendJSON = false; //need this because goog.json.serialize doesn't call toJSON
+	var sjs = new Slate.sharejs.Connection(dummy);
+	window.share_connection = sjs;
+	sjs.debug = true;
+	var sharedoc = sjs.get(docCollection, docId, sexprDoc); //docCollection and docId set in the view		
+	sharedoc.subscribe();
 
-var sjs = new Slate.sharejs.Connection(dummy);
-window.share_connection = sjs;
-sjs.debug = true;
-var sharedoc = sjs.get(docCollection,docId); //docCollection adnd docId set in the view
-sharedoc.subscribe();
+	var editor;
+	var store;
 
-var editor;
-var store;
+	var sel = new Selection([new Region(7,7)]);	
 
-var doc = '(doc (section (h1 "") (p "")))'
+	var catalog = window.catalog || 'unknown';
 
-var sel = new Selection([new Region(7,7)]); //, new Region(298,348), new Region(380), new Region(495,400), new Region(870,830), new Region(1130,1070), new Region(1200,1300), new Region(1743+8,1734)]);
-
-var catalog = window.catalog || 'unknown';
-
-sharedoc.whenReady(function() {
-	if (!sharedoc.type)
-		sharedoc.create('sexpr', doc);
-	else
+	sharedoc.whenReady(function() {		
 		sharedoc.snapshot = Slate.type.deserialize(sharedoc.snapshot);
-	store = new Slate.Store(sharedoc.createContext(), Slate.type);
+		store = new Slate.Store(sharedoc.createContext(), Slate.type);
 
-	store.select(sel);
+		store.select(sel);
 
-	window.wrap = Wrap({store: store,
-		catalog: catalog,
-		docId: window.docId,
-		owns: window.owns || [],
-		status: window.docStatus || 'draft',
-	});
+		window.wrap = Wrap({store: store,
+			catalog: catalog,
+			docId: window.docId,
+			owns: window.owns || [],
+			status: window.docStatus || 'draft',
+		});
 
-	e.friar.renderComponent(wrap, wrapElm)
-
-});
-
-
+		e.friar.renderComponent(wrap, wrapElm);
+	});	
 });
