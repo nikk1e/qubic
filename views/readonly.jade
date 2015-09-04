@@ -3,7 +3,7 @@ extends layout
 block content
   #wrap  
   script(type="text/javascript").
-    var docSexpr = '!{doc.replace("'","\\'")}';
+    var docSexpr = !{JSON.stringify(doc)};
     var docId = '#{docId}';
     var docCollection = 'published';
     var catalog = '#{doc.catalog}';
