@@ -12,6 +12,6 @@ block content
       input(name='title', placeholder='Title',value="#{collection.title}")
       textarea(name='description', placeholder='Description')= collection.description
       input(name='owners', placeholder='Owners',value="#{collection.owners.join(', ')}")
-      input(name='writers', placeholder='Readers',value="#{collection.writers.join(', ')}")
-      input(name='readers', placeholder='Writers',value="#{collection.readers.join(', ')}")
+      input(name='writers', placeholder='Readers',value="#{collection.readers.join(', ')}")
+      input(name='readers', placeholder='Writers',value="#{collection.writers.join(', ')}")
       button.pure-button.pure-button-primary(type='submit') Create
