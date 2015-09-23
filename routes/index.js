@@ -574,7 +574,7 @@ module.exports = function(app, passport, share) {
       				collection:col
       			});
     		}
-    		res.redirect(col.name);
+    		res.redirect('/'+col.name);
 		})
 	});
 
@@ -735,14 +735,16 @@ module.exports = function(app, passport, share) {
 	});
 
 	app.get('/:collection', function(req, res) {
+		var col = req.collection;
 		Document.find({
-  			'catalog':req.collection.name,
+  			'catalog':col.name,
   			'status':'public',
   		}, function(err, docs){
   			if (err) return next(err);
     		res.render('collection', {
-				collection: req.collection,
+				collection: col,
 				stories: (docs || []),
+				showEdit: (col.owners.indexOf(req.user.name) !== -1),
 			});
   		});
 	});	
