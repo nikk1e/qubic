@@ -62,9 +62,9 @@ userSchema.index({name:1},{unique:true});
 
 userSchema.virtual('default_key').get(function () {
   if (this.private_keys.length > 0)
-    return this.private_keys[0].key.replace(/[\r\n]/g,' ');
+    return this.private_keys[0].key.replace(/\r\n|\n/g,'\\n');
   if (this.public_keys.length > 0)
-    return this.public_keys[0].key.replace(/[\r\n]/g,' ');
+    return this.public_keys[0].key.replace(/\r\n|\n/g,'\\n');
   return '';
 });
 
