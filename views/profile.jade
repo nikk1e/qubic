@@ -1,13 +1,14 @@
 extends ./me/layout
 
 block content
-  .content
+  .content.wide
     h1= user.name
+    .heading.top-border
     if (stories.length > 0)
       each story in stories
         .story-block
           h3.title
-            a(href="/#{story.catalog}/#{(story.title || '').replace(' ','_')}-#{story._id}")= (story.title || 'Untitled')            
-          a(href="/#{story.catalog}/#{(story.title || '').replace(' ','_')}-#{story._id}")= story.slug
+            a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_')}-#{story._id}")= (story.title || 'Untitled')
+          a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_')}-#{story._id}")= story.slug
           .meta-line
             span #{moment(story.updated).fromNow()}

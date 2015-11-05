@@ -16,8 +16,8 @@ var Toolbar = createClass({
 				[DOM.em({className:"fa fa-history"},"")]),
 			DOM.a({href:"/me/models",className:"btn pull-right"},
 				[DOM.em({className:"fa fa-user"},"")]),
-			DOM.a({href:"#",className:"btn pull-right", onClick:p.togglePublish},
-				[DOM.em({className:"fa fa-cloud-upload"},"")]),
+			p.renderPublish ? DOM.a({href:"#",className:"btn pull-right", onClick:p.togglePublish},
+				[DOM.em({className:"fa fa-cloud-upload"},"")]) : DOM.div({}),
 			DOM.h1({},(p.title || 'Untitled')),
 			]);
 	},

@@ -92,7 +92,7 @@ block content
     h3 Public
     each key in user.public_keys
       p= key.description
-      p= key.fingerprint.match(/.{1,2}/g).join(':')
+      textarea= key.key
       p Added on #{moment(key.created).format('ll')}
     h3 Private
     each key in user.private_keys

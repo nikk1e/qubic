@@ -1,14 +1,15 @@
 extends layout
 
 block content
-  .content
+  .content.wide
     a.btn.pull-right(href="/new-collection")
       | New Collection 
       em.fa.fa-plus
     h1 Collections
+    .heading.top-border
     if owns.length > 0
       .owns
-        h3 Own
+        h2 Own
         each collection in owns
           .collection
             h3.title

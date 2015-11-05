@@ -64,6 +64,40 @@ function findSubtitle(list) {
 	}
 }
 
+var Messages = createClass({
+	onMessage: function() {
+		var s = this.state;
+		var p = this.props;
+		this.setState({acknowledged:true});
+	},
+	render: function() {
+		var s = this.state;
+		var p = this.props;
+		p.messages = p.messages || [];
+		var self = this;
+
+		if(s.acknowledged || p.acknowledged || p.messages.length == 0) {
+			if (this.timeout)
+				clearTimeout(this.timeout);
+			return DOM.div({});
+		}
+
+		this.timeout = setTimeout(function() {
+			self.timeout = null;
+			self.setState({acknowledged:true});
+		}, 10000);
+
+		return DOM.div({className:"content message"},[
+				DOM.div({className:"pure-u-1"},[
+					DOM.a({href:"#",className:"btn pull-right", onClick:p.toggleMessages},
+					[DOM.em({className:"fa fa-times"},"")]),
+					DOM.div({},	p.messages.map(function(msg){
+									return DOM.p({},msg);
+								})),
+				]),
+		])
+	},
+});
 
 var Publish = createClass({
 	getInitialState: function() {
@@ -190,6 +224,7 @@ var Wrap = createClass({
 			sidebar: 'summary',
 			search: false,
 			publish: false,
+			renderPublish: (this.props.docMode == 'edit'),
 			filter: '',
 		};
 	},
@@ -275,6 +310,9 @@ var Wrap = createClass({
 	onPublish: function() {
 		this.setState({publish:(!(this.state.publish))});
 	},
+	onMessageAck: function() {
+		this.setState({acknowledged:true});
+	},
 	render: function() {
 		var p = this.props;
 		var s = this.state;
@@ -314,7 +352,9 @@ var Wrap = createClass({
 					toggleHistory: this.onHistory,
 					toggleSearch: this.onSearch,
 					togglePublish: this.onPublish,
+					renderPublish: s.renderPublish,
 				}),
+				s.renderPublish ? 
 				Publish({
 					doc:s.doc,
 					docId: p.docId,
@@ -324,6 +364,11 @@ var Wrap = createClass({
 					status: p.status,
 					subtitle: subtitle,
 					togglePublish: this.onPublish,
+				}) : DOM.div({}),
+				Messages({
+					acknowledged: s.acknowledged,
+					messages: p.messages,
+					toggleMessages: this.onMessageAck,
 				}),
 				DOM.div({id:"preview"},[this.editor]),
 			]),

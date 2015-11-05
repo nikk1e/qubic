@@ -20,9 +20,25 @@ router.all('*', function(req, res, next) {
     next();
 });
 
-router.all('/models/*', function(req, res, next) {
-  Document.aggregate() 
-    .match( { catalog : ('@' + req.user.name)} )
+function modifiableCollections(req, res, next) {
+  var user = req.user;
+  var userCatalog = ('@'+user.name);
+  Collection.find({ $or: [
+    {'owners':user.name},
+    {'writers':user.name},
+  ]}, {'name':1,'_id':0})
+  .lean()
+  .exec(function(err, collections) {
+    var names = collections.map(function(doc) { return doc.name; });
+    names.push(userCatalog);
+    req.collections = names;
+    next();
+  });
+}
+
+router.all('/models/*', modifiableCollections, function(req, res, next) {
+    Document.aggregate()
+    .match( { 'catalog':{$in: req.collections}} )
     .group({
       _id : "$status",
       count: { $sum: 1 }
@@ -51,10 +67,9 @@ router.get('/models/drafts', function(req, res, next) {
   });
 });
 
-router.get('/models/public', function(req, res, next) {
+router.get('/models/public', modifiableCollections, function(req, res, next) {
   Document.find({
-  	'catalog':('@' + req.user.name),
-  	'status':'public',
+     'catalog':{$in: req.collections},'status':'public',
   }, 'title slug created updated', function(err, docs){
     res.render('me/stories-public', { stories:(docs || []) });
   });
