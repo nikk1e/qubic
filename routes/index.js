@@ -163,17 +163,16 @@ module.exports = function(app, passport, share) {
 		if (!req.can_edit) {
 			req.messages = ['You do not have permission to edit this document.  It is in read-only mode.'];
 			return show_revision(req, res, next);
-		} else {
-			res.render('edit', {
-				title: 'Qubic',
-				doc: req.doc,
-				catalog: catalog,
-				owns: JSON.stringify(req.owns),
-				writes: JSON.stringify(req.writes),
-				docId: id,
-				messages: JSON.stringify(req.messages || []),
-			});
 		}
+		res.render('edit', {
+			title: 'Qubic',
+			doc: req.doc,
+			catalog: catalog,
+			owns: JSON.stringify(req.owns),
+			writes: JSON.stringify(req.writes),
+			docId: id,
+			messages: JSON.stringify(req.messages || []),
+		});		
 	});
 
 	//update a document in its current location
