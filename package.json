@@ -16,7 +16,7 @@
     "test": "mocha",
     "dev": "DEBUG=qube-web:* NODE_ENV=development npm run watch",
     "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& npm run watch-win",
-    "install-windows-service": "winser -i",
+    "install-windows-service": "winser -i --startcmd=\"node ./bin/www\"",
     "uninstall-windows-service": "winser -r"
   },
   "author": {
