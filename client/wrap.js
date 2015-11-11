@@ -224,7 +224,7 @@ var Wrap = createClass({
 			sidebar: 'summary',
 			search: false,
 			publish: false,
-			renderPublish: (this.props.docMode == 'edit'),
+			renderPublish: (docMode === 'edit'),
 			filter: '',
 		};
 	},
