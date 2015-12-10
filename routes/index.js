@@ -93,6 +93,27 @@ module.exports = function(app, passport, share) {
 		});
 	});
 
+	app.get('/copy/:draftId', isLoggedIn, function(req, res, next) {
+		//Get the details from the current draftId
+		var copy = req.doc;
+		var id = genId();
+		var doc = new Document();
+		doc.hidden = true;
+		doc._id = id;
+		doc.catalog = '@' + req.user.name;
+		doc.title = copy.title;
+		doc.data = copy.data;
+		doc.text = copy.text;
+		doc.slug = '';
+		doc.save(function(err) {
+			if (err) return next(err);
+			req.user.save(function(err) {
+				if (err) return next(err);
+				res.redirect('/edit/' + id);
+			});
+		});
+	});
+
 	app.param('draftId', function(req, res, next, id) {
 		//check permissions
 		Document.findOne({ _id :  id }, function(err, doc) {

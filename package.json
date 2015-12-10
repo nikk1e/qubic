@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "build-css": "stylus style --out public/stylesheets",
     "watch-css": "nodemon -e styl -x \"npm run build-css\"",
-    "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js",
+    "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js -c",
     "watch-js": "watchify client/main.js -o public/javascript/main.js -v",
     "watch-assets": "npm run watch-css & npm run watch-js",
     "watch-server": "nodemon --ignore style/ --ignore public/ --ignore client/ --ignore test/ ./bin/www --ignore node_modules/",

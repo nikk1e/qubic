@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  #wrap  
+  #wrap(class='readonly')  
   script(type="text/javascript").
     var docSexpr = !{JSON.stringify(doc)};
     var docId = '#{docId}';

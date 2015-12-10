@@ -224,7 +224,7 @@ var Wrap = createClass({
 			sidebar: 'summary',
 			search: false,
 			publish: false,
-			renderPublish: (docMode === 'edit'),
+			editable: (docMode === 'edit'),
 			filter: '',
 		};
 	},
@@ -327,7 +327,7 @@ var Wrap = createClass({
 				plugins.encryption,
 			],
 		});
-		var title = findTitle(s.doc);
+		var title = findTitle(s.doc);		
 		var subtitle = findSubtitle(s.doc);
 		var bcname = "book-content";
 		if (s.publish)
@@ -352,9 +352,11 @@ var Wrap = createClass({
 					toggleHistory: this.onHistory,
 					toggleSearch: this.onSearch,
 					togglePublish: this.onPublish,
-					renderPublish: s.renderPublish,
+					editable: s.editable,
+					docId: p.docId,
+					catalog: s.catalog,
 				}),
-				s.renderPublish ? 
+				s.editable ? 
 				Publish({
 					doc:s.doc,
 					docId: p.docId,
