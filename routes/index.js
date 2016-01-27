@@ -7,16 +7,49 @@ var ot         = require('ot-sexpr');
 module.exports = function(app, passport, share) {
 
 // normal routes ===============================================================
-
+	
 	// show the home page (will also have our login links)
-	app.get('/', function(req, res) {
+	app.get('/', lastEditedDocuments, function(req, res) {
 		if (req.isAuthenticated()) {
-			//load users relevant stories (follows)
+			res.render('index', { documents: req.documents, writerOf: req.writerOf } );
 		} else {
 			//load stories from highlights collection
 		}
-		res.render('index');
+		res.render('index', { documents:[], writerOf:[]} );
 	});
+
+	function lastEditedDocuments(req, res, next) {
+		var user = req.user;
+		Collection.find({ $or: [
+			{'owners':user.name},
+			{'writers':user.name},
+			{'readers':user.name}
+			]}, 'name owners writers readers')
+	    .lean()
+	    .exec(function(err, colls) {
+			var collections = colls.map(function(coll) {
+		      return {  name: coll.name,
+		                write: (coll.owners.indexOf(user.name) >= 0 ||
+		                        coll.writers.indexOf(user.name) >= 0),
+		      };
+	    });
+	    collections.push({name:('@'+user.name), write:true});
+	    var writerOf = collections.reduce(function(ret, curr){
+			ret[curr["name"]] = curr.write;
+			return ret;
+	    },{});
+		Document.find({'catalog':{$in: collections.map(function(f){ return f.name;})}},
+			'catalog title slug updated')
+			.sort({'updated':-1})
+			.limit(20)
+			.lean()
+			.exec(function(err, docs){
+				req.documents = docs || [];
+      			req.writerOf = writerOf;
+      			next();
+			});
+		});
+	}
 
 	app.get('/env/settings', isLoggedIn, function(req, res) {		
 		res.render('settings');
@@ -50,6 +83,27 @@ module.exports = function(app, passport, share) {
 		doc._id = id;
 		doc.catalog = '@' + req.user.name;
 		doc.title = '';
+		doc.slug = '';
+		doc.save(function(err) {
+			if (err) return next(err);
+			req.user.save(function(err) {
+				if (err) return next(err);
+				res.redirect('/edit/' + id);
+			});
+		});
+	});
+
+	app.get('/copy/:draftId', isLoggedIn, function(req, res, next) {
+		//Get the details from the current draftId
+		var copy = req.doc;
+		var id = genId();
+		var doc = new Document();
+		doc.hidden = true;
+		doc._id = id;
+		doc.catalog = '@' + req.user.name;
+		doc.title = copy.title;
+		doc.data = copy.data;
+		doc.text = copy.text;
 		doc.slug = '';
 		doc.save(function(err) {
 			if (err) return next(err);
@@ -126,16 +180,20 @@ module.exports = function(app, passport, share) {
 	app.get('/edit/:draftId', isLoggedIn, myCollections, function(req, res, next) {
 		var id = req.params.draftId;
 		var user = req.user;
-		if (!req.can_edit)
-			return next(new Error('You do not have permssion to edit this document.'));
+		var catalog = req.catalog;
+		if (!req.can_edit) {
+			req.messages = ['You do not have permission to edit this document.  It is in read-only mode.'];
+			return show_revision(req, res, next);
+		}
 		res.render('edit', {
 			title: 'Qubic',
 			doc: req.doc,
-			catalog: req.catalog,
+			catalog: catalog,
 			owns: JSON.stringify(req.owns),
 			writes: JSON.stringify(req.writes),
 			docId: id,
-		});
+			messages: JSON.stringify(req.messages || []),
+		});		
 	});
 
 	//update a document in its current location
@@ -574,7 +632,7 @@ module.exports = function(app, passport, share) {
       				collection:col
       			});
     		}
-    		res.redirect(col.name);
+    		res.redirect('/'+col.name);
 		})
 	});
 
@@ -662,6 +720,7 @@ module.exports = function(app, passport, share) {
 
 	function show_revision(req, res, next) {
 		var doc = req.doc.data;
+		var messages = req.messages || [];
 		if (req.params.rev) {
 			//
 		}
@@ -674,6 +733,7 @@ module.exports = function(app, passport, share) {
 				owns: JSON.stringify(req.owns),
 				writes: JSON.stringify(req.writes),
 				docId: req.doc.id,
+				messages: JSON.stringify(messages),
 			});
 			//res.send('(doc (section (code "A = 11") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
 		}
@@ -735,14 +795,17 @@ module.exports = function(app, passport, share) {
 	});
 
 	app.get('/:collection', function(req, res) {
+		var col = req.collection;
 		Document.find({
-  			'catalog':req.collection.name,
+  			'catalog':col.name,
   			'status':'public',
   		}, function(err, docs){
   			if (err) return next(err);
     		res.render('collection', {
-				collection: req.collection,
+				collection: col,
 				stories: (docs || []),
+				showEdit: (col.owners.indexOf(req.user.name) !== -1),
+				canWrite: (col.writers.indexOf(req.user.name) !== -1),
 			});
   		});
 	});	

@@ -442,6 +442,23 @@ div.result th.category {
 	background-color: rgb(134,192,241);
 }
 
+div.result div {
+  float:right;
+  width:30px;
+}
+div.result th.lastcolumn div a:before {
+  content: "\f0ea";
+  float: right;
+  color: black;
+  font-family: FontAwesome;  
+  font-size: small;
+  margin: 0px 0px 0px 10px;  
+}
+div.result th.lastcolumn div a:active::before {
+  content: "Copied!";
+  font-family: 'Roboto', arial, sans-serif;  
+}
+
 td.output {
 	background-color: rgb(216,230,242);
 }
@@ -639,3 +656,14 @@ pre {
 	padding: 1em;
 	background: rgba(0,0,0,0.05);
 }
+
+.message {
+	background: rgb(255, 165, 0);
+	position: relative;
+	padding: 0.5em;
+	padding-top: 0;
+}
+
+.readonly .book .book-content {
+	background: #f4f4f4;
+}	

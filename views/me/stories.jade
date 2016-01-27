@@ -1,13 +1,13 @@
 extends layout
 
 block content
-  .content
+  .content.wide
     block link
       -var selected = 'draft';
     -var menu = {'draft':'Drafts','public':'Public','unlisted':'Unlisted'};
     h1 Your models
     
-    ul.nav-tab.content
+    ul.nav-tab.content.wide
       each val, key in menu
         li(class=selected === key ? "active" : "")
           a(href="#{val.toLowerCase()}")

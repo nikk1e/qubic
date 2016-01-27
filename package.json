@@ -6,7 +6,7 @@
     "start": "node ./bin/www",
     "build-css": "stylus style --out public/stylesheets",
     "watch-css": "nodemon -e styl -x \"npm run build-css\"",
-    "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js",
+    "build-js": "browserify client/main.js | uglifyjs -o public/javascript/main.js -c",
     "watch-js": "watchify client/main.js -o public/javascript/main.js -v",
     "watch-assets": "npm run watch-css & npm run watch-js",
     "watch-server": "nodemon --ignore style/ --ignore public/ --ignore client/ --ignore test/ ./bin/www --ignore node_modules/",
@@ -16,7 +16,7 @@
     "test": "mocha",
     "dev": "DEBUG=qube-web:* NODE_ENV=development npm run watch",
     "dev-win": "set DEBUG=qube-web:*&& set NODE_ENV=development&& npm run watch-win",
-    "install-windows-service": "winser -i",
+    "install-windows-service": "winser -i --startcmd=\"node ./bin/www\"",
     "uninstall-windows-service": "winser -r"
   },
   "author": {

@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  #wrap  
+  #wrap(class='readonly')  
   script(type="text/javascript").
     var docSexpr = !{JSON.stringify(doc)};
     var docId = '#{docId}';
@@ -12,5 +12,6 @@ block content
     var owns = !{owns};
     var writes = !{writes};
     var docMode = 'read';
+    var messages =  !{messages};
   script(type='text/javascript' src='/javascript/utils.js')  
   script(type='text/javascript' src='/javascript/main.js')

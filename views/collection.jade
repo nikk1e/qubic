@@ -5,14 +5,26 @@ block header
   include ./includes/header.jade
 
 block content
-  h1= collection.title
-  if (stories.length > 0)
-    each story in stories
-      .story-block
-        h3.title
-          a(href="/edit/#{story._id}")= (story.title || 'Untitled')
-        a(href="/edit/#{story._id}")= story.slug
-        .meta-line
-          span #{moment(story.updated).fromNow()}
-  else
-    p No models published yet.
+  .content.wide
+    if (showEdit)
+      a.btn.pull-right(href="#{collection.name}/edit")
+        | Edit Collection 
+        em.fa.fa-pencil-square-o
+    h1= collection.title
+    if (stories.length > 0)
+      each story in stories
+        .story-block          
+          //if (canWrite || showEdit)
+          //  h3.title
+          //    a(href="/edit/#{story._id}")= (story.title || 'Untitled')
+          // a(href="/edit/#{story._id}")= story.slug
+          //  .meta-line
+          //    span #{moment(story.updated).fromNow()}
+          //else
+          h3.title
+            a(href="/#{collection.name}/#{(story.title || 'Untitled').replace(/\s/g,'_')}-#{story._id}")= (story.title || 'Untitled')
+          a(href="/#{collection.name}/#{(story.title || 'Untitled').replace(/\s/g,'_')}-#{story._id}")= story.slug
+          .meta-line
+            span #{moment(story.updated).fromNow()}
+    else
+      p No models published yet.

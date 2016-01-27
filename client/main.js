@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			docId: window.docId,
 			owns: window.owns || [],
 			status: window.docStatus || 'draft',
+			messages: window.messages || [],
 		});
 
 		e.friar.renderComponent(wrap, wrapElm);
