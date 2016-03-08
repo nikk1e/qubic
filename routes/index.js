@@ -51,6 +51,7 @@ module.exports = function(app, passport, share) {
 		});
 	}
 
+	//TODO: this really should not be in for security reasons.
 	app.get('/env/settings', isLoggedIn, function(req, res) {		
 		res.render('settings');
 	});
@@ -100,16 +101,21 @@ module.exports = function(app, passport, share) {
 		var doc = new Document();
 		doc.hidden = true;
 		doc._id = id;
+		doc.parent = req.params.draftId;
 		doc.catalog = '@' + req.user.name;
 		doc.title = copy.title;
-		doc.data = copy.data;
+		//doc.data = copy.data;
+		//console.log(copy.data)
 		doc.text = copy.text;
 		doc.slug = '';
 		doc.save(function(err) {
 			if (err) return next(err);
 			req.user.save(function(err) {
 				if (err) return next(err);
-				res.redirect('/edit/' + id);
+				app.locals.backend.submit('draft', id, {v:0, create:{type:'sexpr', data:copy.data}},function(err) {
+					if (err) return next(err);
+					res.redirect('/edit/' + id);
+				});
 			});
 		});
 	});

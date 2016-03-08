@@ -46,6 +46,7 @@ var db = livedbMongo(MONGODB_URL, {safe:false});
 var backend = livedb.client(db);
 var share = sharejs.server.createClient({backend: backend});
 
+app.locals.backend = backend;
 
 share.use(function(req, next) {
   //TODO: op filter for share docs here
