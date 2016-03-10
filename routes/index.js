@@ -675,20 +675,19 @@ module.exports = function(app, passport, share) {
       });
     });
 
-  	//TODO: authentication check
-	app.get('/api/:cName/:docName/:rev?', function(req, res, next) {
-	  var backend = share.backend;
-	  backend.fetch(req.params.cName, req.params.docName, function(err, doc) {
-        if (err) next(err);
-        if (!doc.type) return res.status(404);
+    function revision(cName, docName, rev, next) {
+    	var backend = share.backend;
+    	backend.fetch(cName, docName, function(err, doc) {
+        if (err) return next(err);
+        if (!doc.type) return next('Unknown file');
   
         var snapshot = ot.parse(decodeURIComponent(escape(doc.data)))[0];
-        var v = parseInt(req.params.rev || doc.v);
-        if (v > doc.v) return res.status(404, 'Unknown revision');
+        var v = parseInt(rev || doc.v);
+        if (v > doc.v) return next('Unknown revision');
         var from = v;
         var to = doc.v + 1;
-        backend.getOps(req.params.cName,
-        	req.params.docName, from, to, function(err, ops) {
+        backend.getOps(cName,
+        	docName, from, to, function(err, ops) {
       		if (err) return next(err);
       		//TODO: rewind to snapshot
       		var op;
@@ -705,15 +704,19 @@ module.exports = function(app, passport, share) {
       				snapshot = ot.apply(prev, o);
       			}
       		  };
-      		  //console.log(o)
-      		  //console.log(prev.toSexpr().replace(/'/g, '\\\''))
-           	  res.send(snapshot.toSexpr());
+           	  return next(null, snapshot); // return the snapshot
       		} catch (e) {
-      			//console.log(o)
-      			//console.log(snapshot.toSexpr().replace(/'/g, '\\\''))
       			return next(e)
       		}
         });
+      });
+    }
+
+  	//TODO: authentication check
+	app.get('/api/:cName/:docName/:rev?', function(req, res, next) {
+	  revision(req.params.cName, req.params.docName, req.params.rev, function(err, snapshot) {
+        if (err) next(err);
+        res.send(snapshot.toSexpr());
       });
 	})
 
@@ -725,24 +728,43 @@ module.exports = function(app, passport, share) {
 	app.get('/:collection/:title/playback/:range?', playback);
 
 	function show_revision(req, res, next) {
+		console.log(req.params);
 		var doc = req.doc.data;
 		var messages = req.messages || [];
 		if (req.params.rev) {
-			//
-		}
-		if (req.xhr) {
-			res.send(doc || '(doc)');
+			revision('draft', req.id, req.params.rev, function(err, snapshot) {
+       			console.log('here')
+       			console.log(err)
+       			if (err) return next(err);
+       			console.log(snapshot.toSexpr())
+       			if (req.xhr) {
+					res.send(snapshot.toSexpr() || '(doc)');
+				} else {
+        			res.render('readonly', {
+						doc:snapshot.toSexpr(),
+						catalog: req.catalog,
+						owns: JSON.stringify(req.owns),
+						writes: JSON.stringify(req.writes),
+						docId: req.doc.id,
+						messages: JSON.stringify(messages),
+					});
+        		}
+      		});
 		} else {
-			res.render('readonly', { 
-				doc:doc,
-				catalog: req.catalog,
-				owns: JSON.stringify(req.owns),
-				writes: JSON.stringify(req.writes),
-				docId: req.doc.id,
-				messages: JSON.stringify(messages),
-			});
-			//res.send('(doc (section (code "A = 11") (code "N[] = Range(10)") (code "M[] = Range(5)")))');
+			if (req.xhr) {
+				res.send(doc || '(doc)');
+			} else {
+				res.render('readonly', { 
+					doc:doc,
+					catalog: req.catalog,
+					owns: JSON.stringify(req.owns),
+					writes: JSON.stringify(req.writes),
+					docId: req.doc.id,
+					messages: JSON.stringify(messages),
+				});
+			}
 		}
+		
 		//req.collection -- might be a user
 		//if no rev number then it should get the published version
 		//if it was an accept application/qube request then it should
@@ -756,6 +778,7 @@ module.exports = function(app, passport, share) {
 		console.log(title);
 		var ts = title.split(/-/g);
 		var id = ts[ts.length-1];
+		req.id = id;
 		console.log(id)
 		Document.findOne({ '_id' :  id }, function(err, doc) {
     		if (err) {
@@ -771,7 +794,7 @@ module.exports = function(app, passport, share) {
   		});
 	});
 
-	app.get('/@:name/:title/:rev?', myCollections, show_revision);
+	app.get('/@:name/:title/:rev?', myCollections,  show_revision);
 	app.get('/:collection/:title/:rev?', myCollections, show_revision);
 
 	app.get('/@:name', function(req, res, next) {

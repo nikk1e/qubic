@@ -118,7 +118,24 @@ var Summary = createClass({
 
 var Info = createClass({
 	render: function() {
-		return DOM.div({className:"info"},"Info goes here");
+		return DOM.div({className:"info"},[
+			DOM.h3({},"Help"),
+			DOM.p({},"Insert Table: Ctrl+Alt+t"),
+			DOM.p({},"Insert Row: Enter (in table)"),
+			DOM.p({},"Insert Column Before: Ctrl+Alt+c (in table)"),
+			DOM.p({},"Insert Column After: Ctrl+Alt+d (in table)"),
+			DOM.p({},"Bold: Ctrl+b"),
+			DOM.p({},"Italics: Ctrl+i"),
+			DOM.p({},"Superscript: Ctrl+."),
+			DOM.p({},"Subscript: Ctrl+,"),
+			DOM.p({},"Code: Space (on new line)"),
+			DOM.p({},"Blockquote: > Space (on new line)"),
+			DOM.p({},"Heading 1: # Space (on new line)"),
+			DOM.p({},"Heading 2: ## Space (on new line)"),
+			DOM.p({},"Heading 3: ### Space (on new line)"),
+			DOM.p({},"Heading 4: #### Space (on new line)"),
+			DOM.p({},"Multiple selection: Hold down Ctrl while selecting to get multiple selections."),
+			]);
 	}
 });
 
