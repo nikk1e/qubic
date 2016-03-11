@@ -3,6 +3,7 @@ var Document   = require('../models/document');
 var Submission = require('../models/submission');
 var User       = require('../models/user');
 var ot         = require('ot-sexpr');
+var moment     = require('moment');
 
 module.exports = function(app, passport, share) {
 
@@ -674,6 +675,35 @@ module.exports = function(app, passport, share) {
       	res.send(ops);
       });
     });
+
+    app.get('/api/:cName/:docName/hist/:rev?', function(req, res, next) {
+    	var backend = share.backend;
+    	var cName = req.params.cName;
+    	var docName = req.params.docName;
+    	backend.fetch(cName, docName, function(err, doc) {
+        	if (err) return next(err);
+        	if (!doc.type) return next('Unknown file');
+        	var to = parseInt(req.params.rev || doc.v);
+        	var from = to - 10000;
+        	if (from <= 0) from = 1;
+        	backend.getOps(cName,
+        		docName, from, to, function(err, ops) {
+      			if (err) return next(err);
+      			var hist = [];
+      			var last;
+      			for (var i = ops.length - 1; i >= 0; i--) {
+      				var op = ops[i];
+      				var date = new Date(op.m.ts);
+      				var d = date.valueOf()
+      				if (last == undefined || d < (last - (15*60000)) ) {
+      					hist.push({date:date.toISOString(), v:op.v});
+      					last = d;
+      				}
+      			}
+      			res.send({to:to, from:from, history:hist});
+      		});
+    	});
+    })
 
     function revision(cName, docName, rev, next) {
     	var backend = share.backend;

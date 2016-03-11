@@ -140,6 +140,41 @@ var Info = createClass({
 });
 
 var History = createClass({
+	//TODO: call the api to get some history.
+	getInitialState: function() {
+		return {history:[]}
+	},
+	updateHistory: function(hist) {
+		console.log(hist.history)
+		console.log(this.state.history)
+		history = this.state.history.concat(hist.history);
+		console.log(history)
+		this.setState({history:history, from:hist.from})
+	},
+	didMount: function() {
+		var req = new XMLHttpRequest();
+		var url = '/api/'+window.docCollection+'/'+window.docId+'/hist'
+		if (this.state.from)
+			url += '/' + this.state.from;
+		var updateHistory = this.updateHistory;
+		console.log(url)
+		//return false;
+		req.onreadystatechange = function (data) {
+  			// code
+  			if (req.readyState == XMLHttpRequest.DONE ) {
+  				if (req.status === 200)
+  					updateHistory(JSON.parse(req.responseText));
+  				else if (req.status === 400)
+  					console.log(data);
+  				else
+  					console.log(req.responseText);
+  			}
+		};
+		req.open('GET', url, true);
+		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		req.send();
+	},
+
 	render: function() {
 		return DOM.div({className:"history"},"History goes here");
 	}
@@ -176,7 +211,7 @@ var Sidebar = createClass({
 					value: p.filter,
 					}),
 				]),
-			Show({filter:p.filter, doc:doc}),
+			Show({filter:p.filter, doc:doc, store:p.store}),
 			]);
 	},
 });
