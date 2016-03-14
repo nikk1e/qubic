@@ -1,6 +1,7 @@
 var friar = require('friar');
 var DOM         = friar.DOM;
 var createClass = friar.createClass;
+var moment = require('moment');
 
 var ot = require('ot-sexpr');
 var List = ot.List;
@@ -140,24 +141,20 @@ var Info = createClass({
 });
 
 var History = createClass({
-	//TODO: call the api to get some history.
 	getInitialState: function() {
-		return {history:[]}
+		return {history:[], more:false}
 	},
 	updateHistory: function(hist) {
-		console.log(hist.history)
-		console.log(this.state.history)
-		history = this.state.history.concat(hist.history);
-		console.log(history)
-		this.setState({history:history, from:hist.from})
+		var history = this.state.history.concat(hist.history);
+		this.setState({history:history, from:hist.from, more:(hist.from > 1)})
 	},
-	didMount: function() {
+	loadMore: function() {
+		this.setState({more:false});
 		var req = new XMLHttpRequest();
 		var url = '/api/'+window.docCollection+'/'+window.docId+'/hist'
 		if (this.state.from)
 			url += '/' + this.state.from;
 		var updateHistory = this.updateHistory;
-		console.log(url)
 		//return false;
 		req.onreadystatechange = function (data) {
   			// code
@@ -174,9 +171,49 @@ var History = createClass({
 		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		req.send();
 	},
-
+	didMount: function() {
+		this.loadMore();
+	},
+	onLoadMore: function(e) {
+		e.preventDefault();
+		this.loadMore();
+		return false;
+	},
 	render: function() {
-		return DOM.div({className:"history"},"History goes here");
+		var hist = [
+			DOM.h3({key:'hist'},"History")
+		]
+		var today = moment();
+		var year = today.year();
+		var month = today.month();
+		var day = today.day();
+		this.state.history.forEach(function(h, i) {
+			var d = moment(h.date);
+			var dy = d.year();
+			var dm = d.month();
+			var dd = d.day();
+			var url = '/' + window.catalog + '/' + window.docId + '/' + h.v
+			if (dy != year) {
+				hist.push(DOM.h4({key:i+'_year'},""+dy));
+				year = dy;
+				month = -1;
+				day = -1;
+			}
+			if (dm != month) {
+				hist.push(DOM.h4({key:i+'_month'},d.format('MMMM')));
+				month = dm;
+				day = -1;
+			}
+			if (dd != day) {
+				hist.push(DOM.h4({key:i+'_day'},d.format('ddd Do')));
+				day = dd;
+			}
+			hist.push(DOM.a({key:i, href: url, style:{display:'block'}},d.format('H:mm a')));
+		})
+		if (this.state.more) {
+			hist.push(DOM.a({key:'load', onClick:this.onLoadMore, href:'#'},"Load More ..."))
+		}
+		return DOM.div({className:"history"},hist);
 	}
 });
 

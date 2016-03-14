@@ -759,7 +759,7 @@ module.exports = function(app, passport, share) {
 
 	function show_revision(req, res, next) {
 		console.log(req.params);
-		var doc = req.doc.data;
+		var doc = req.doc;
 		var messages = req.messages || [];
 		if (req.params.rev) {
 			revision('draft', req.id, req.params.rev, function(err, snapshot) {
@@ -771,7 +771,8 @@ module.exports = function(app, passport, share) {
 					res.send(snapshot.toSexpr() || '(doc)');
 				} else {
         			res.render('readonly', {
-						doc:snapshot.toSexpr(),
+						doc:doc,
+						sexpr:snapshot.toSexpr(),
 						catalog: req.catalog,
 						owns: JSON.stringify(req.owns),
 						writes: JSON.stringify(req.writes),
@@ -786,6 +787,7 @@ module.exports = function(app, passport, share) {
 			} else {
 				res.render('readonly', { 
 					doc:doc,
+					sexpr:doc.data,
 					catalog: req.catalog,
 					owns: JSON.stringify(req.owns),
 					writes: JSON.stringify(req.writes),
@@ -828,6 +830,7 @@ module.exports = function(app, passport, share) {
 	app.get('/:collection/:title/:rev?', myCollections, show_revision);
 
 	app.get('/@:name', function(req, res, next) {
+		req.catalog = ('@' + req.collection.name);
 		Document.find({
   			'catalog':('@' + req.collection.name),
   			'status':'public',
@@ -855,6 +858,7 @@ module.exports = function(app, passport, share) {
 
 	app.get('/:collection', function(req, res) {
 		var col = req.collection;
+		req.catalog = col.name;
 		Document.find({
   			'catalog':col.name,
   			'status':'public',
