@@ -783,7 +783,7 @@ module.exports = function(app, passport, share) {
       		});
 		} else {
 			if (req.xhr) {
-				res.send(doc || '(doc)');
+				res.send(doc.data || '(doc)');
 			} else {
 				res.render('readonly', { 
 					doc:doc,
