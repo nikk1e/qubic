@@ -53,6 +53,33 @@ share.use(function(req, next) {
   next();
 });
 
+var pv = {}
+share.preValidate = function(op, doc) {
+  if (op.op != undefined) {
+    pv[doc.docName + ':' + doc.v] = doc.data.toSexpr()
+  }
+}
+
+share.validate = function(op, doc) {
+  if (op.op != undefined) {
+    try {
+      var key = doc.docName + ':' + doc.v;
+      var prevSS = pv[key];
+      delete pv[key];
+      var o = ot.invert(op.op);
+      var prev = ot.apply(doc.data, o);
+      var prevS = prev.toSexpr();
+      if (prevSS != prevS) {
+        return 'Inverse does not match original';
+      }
+    } catch(e) {
+      console.log(e)
+      return "Could not invert op";
+    }
+  }
+  return;
+}
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -109,7 +136,7 @@ app.use(Socket(function(client, req) {
   };
 
   client.on('message', function(data) {
-    console.log(JSON.stringify(data))
+    //console.log(JSON.stringify(data))
     stream.push(data);
   });
 

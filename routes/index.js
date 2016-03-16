@@ -659,8 +659,18 @@ module.exports = function(app, passport, share) {
 	// Share ----------
 
   	function fix_utf8(o) {
-  		if (o.type === 'char')
+  		if (o.type === 'char') {
+  			var x = o.value.length
+  			try {
   			o.value = decodeURIComponent(escape(o.value));
+  			if (o.value.length != o.n)
+  				console.log(o)
+  			if (o.value.length != x)
+  				console.log(o)
+  			} catch(e) {
+  				console.log(o)
+  			}
+  		}
   		return o;
   	}
 
@@ -707,11 +717,12 @@ module.exports = function(app, passport, share) {
 
     function revision(cName, docName, rev, next) {
     	var backend = share.backend;
+    	console.log(cName)
+    	console.log(docName)
     	backend.fetch(cName, docName, function(err, doc) {
         if (err) return next(err);
         if (!doc.type) return next('Unknown file');
-  
-        var snapshot = ot.parse(decodeURIComponent(escape(doc.data)))[0];
+        var snapshot = ot.parse(doc.data)[0];
         var v = parseInt(rev || doc.v);
         if (v > doc.v) return next('Unknown revision');
         var from = v;
@@ -729,6 +740,7 @@ module.exports = function(app, passport, share) {
       			if (op.op) {
       				prev = snapshot;
       				o = ot._trim(op.op);
+      				console.log(o)
       				o = o.map(fix_utf8);
       				o = ot.invert(o);
       				snapshot = ot.apply(prev, o);
@@ -736,6 +748,8 @@ module.exports = function(app, passport, share) {
       		  };
            	  return next(null, snapshot); // return the snapshot
       		} catch (e) {
+      			console.log(o)
+      			console.log(snapshot.toSexpr())
       			return next(e)
       		}
         });
