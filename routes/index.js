@@ -98,31 +98,34 @@ module.exports = function(app, passport, share) {
 		});
 	});
 
-	app.get('/copy/:draftId', isLoggedIn, function(req, res, next) {
-		//Get the details from the current draftId
+	app.post('/copy/:draftId', isLoggedIn, function(req, res, next) {
+		//console.log(req)
 		var copy = req.doc;
+		var sexpr = req.body.sexpr;
 		var id = genId();
 		var doc = new Document();
+		doc.parent = req.body.parent;
 		doc.hidden = true;
 		doc._id = id;
-		doc.parent = req.params.draftId;
 		doc.catalog = '@' + req.user.name;
 		doc.title = copy.title;
-		//doc.data = copy.data;
-		//console.log(copy.data)
-		doc.text = copy.text;
+		doc.text = '';
 		doc.slug = '';
 		doc.save(function(err) {
 			if (err) return next(err);
 			req.user.save(function(err) {
 				if (err) return next(err);
-				app.locals.backend.submit('draft', id, {v:0, create:{type:'sexpr', data:copy.data}},function(err) {
-					if (err) return next(err);
-					res.redirect('/edit/' + id);
-				});
+				app.locals.backend.submit('draft',
+					id, 
+					{v:0, create:{type:'sexpr', data:sexpr}},
+					function(err) {
+						if (err) return next(err);
+						res.redirect('/edit/' + id);
+					}
+				);
 			});
-		});
-	});
+		})
+	})
 
 	app.param('draftId', function(req, res, next, id) {
 		//check permissions

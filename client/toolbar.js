@@ -6,7 +6,7 @@ var Toolbar = createClass({
 	render: function() {
 		var p = this.props;
 		var s = this.state;
-		console.log(p.store)
+		var d = p.store.document().toSexpr();
 		return DOM.div({className:'toolbar'},[
 			DOM.a({href:"#",className:"btn pull-left", onClick:p.toggleSummary},
 				[DOM.em({className:"fa fa-align-justify"},"")]),
@@ -20,8 +20,11 @@ var Toolbar = createClass({
 				[DOM.em({className:"fa fa-user"},"")]),
 			p.editable ? DOM.a({href:"#",className:"btn pull-right", onClick:p.togglePublish},
 				[DOM.em({className:"fa fa-cloud-upload"},"")]) : DOM.div({}),
-			DOM.a({href:"/copy/" + p.docId,className:"btn pull-right"},
-				[DOM.em({className:"fa fa-copy"},"")]),			
+			DOM.form({action:"/copy/" + p.docId, method:'post',className:"pull-right"},
+				[DOM.input({type:'hidden', name:'sexpr', value:d}),
+				 DOM.button({type:'submit',className:"btn pull-right"},
+				 	[DOM.em({className:"fa fa-copy"},"")])
+				]),			
 			DOM.h1({},(p.title || 'Untitled')), //Put connected users here??
 			]);
 	},
