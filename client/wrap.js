@@ -355,6 +355,7 @@ var Wrap = createClass({
 					editable: s.editable,
 					docId: p.docId,
 					catalog: s.catalog,
+					store: p.store,
 				}),
 				s.editable ? 
 				Publish({

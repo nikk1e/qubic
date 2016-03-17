@@ -6,6 +6,7 @@ var Toolbar = createClass({
 	render: function() {
 		var p = this.props;
 		var s = this.state;
+		console.log(p.store)
 		return DOM.div({className:'toolbar'},[
 			DOM.a({href:"#",className:"btn pull-left", onClick:p.toggleSummary},
 				[DOM.em({className:"fa fa-align-justify"},"")]),
