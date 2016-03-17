@@ -183,6 +183,8 @@ var History = createClass({
 		var hist = [
 			DOM.h3({key:'hist'},"History")
 		]
+		var doc = this.props.doc;
+		var parent = window.parent;
 		var today = moment();
 		var year = today.year();
 		var month = today.month();
@@ -210,6 +212,8 @@ var History = createClass({
 			}
 			hist.push(DOM.a({key:i, href: url, style:{display:'block'}},d.format('H:mm a')));
 		})
+		parent && hist.push(
+			DOM.a({key:'parent', href:parent},"Source Qube"));
 		if (this.state.more) {
 			hist.push(DOM.a({key:'load', onClick:this.onLoadMore, href:'#'},"Load More ..."))
 		}

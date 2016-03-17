@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 
+
 /*
 Document represents the published document.
 
@@ -17,6 +18,7 @@ var documentSchema = mongoose.Schema({
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
 	status: { type: String, default: 'draft' },
+	parent: String
 });
 
 documentSchema.index({
