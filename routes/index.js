@@ -104,8 +104,7 @@ module.exports = function(app, passport, share) {
 		var sexpr = req.body.sexpr;
 		var id = genId();
 		var doc = new Document();
-		if (copy.text)
-			doc.parent = '/' + copy.catalog + '/' + (copy.title || Untitled).replace(/\s/g,'_') + '-' + copy._id;
+		doc.parent = '/' + copy.catalog + '/' + (copy.title || Untitled).replace(/\s/g,'_') + '-' + copy._id;
 		doc.hidden = true;
 		doc._id = id;
 		doc.catalog = '@' + req.user.name;
@@ -803,21 +802,6 @@ module.exports = function(app, passport, share) {
 					});
         		}
       		});
-		/*} else {
-			if (req.xhr) {
-				res.send(doc.data || '(doc)');
-			} else {
-				res.render('readonly', { 
-					doc:doc,
-					sexpr:doc.data,
-					catalog: req.catalog,
-					owns: JSON.stringify(req.owns),
-					writes: JSON.stringify(req.writes),
-					docId: req.doc.id,
-					messages: JSON.stringify(messages),
-				});
-			}
-		}*/
 		
 		//req.collection -- might be a user
 		//if no rev number then it should get the published version
