@@ -10,6 +10,8 @@ module.exports = function(app, passport, share) {
 // normal routes ===============================================================
 	
 	// show the home page (will also have our login links)
+	//TODO: this should not be doing lastEditedDocuments until it knows you are
+	// authenticated.
 	app.get('/', lastEditedDocuments, function(req, res) {
 		if (req.isAuthenticated()) {
 			res.render('index', { documents: req.documents, writerOf: req.writerOf } );
@@ -19,8 +21,9 @@ module.exports = function(app, passport, share) {
 		res.render('index', { documents:[], writerOf:[]} );
 	});
 
+	//TODO: this code is bad: collections scope is all over the place
 	function lastEditedDocuments(req, res, next) {
-		var user = req.user;
+		var user = req.user || {name: 'unknown'};
 		Collection.find({ $or: [
 			{'owners':user.name},
 			{'writers':user.name},
