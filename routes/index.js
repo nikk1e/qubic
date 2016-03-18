@@ -104,13 +104,14 @@ module.exports = function(app, passport, share) {
 		var sexpr = req.body.sexpr;
 		var id = genId();
 		var doc = new Document();
-		doc.parent = req.body.parent;
+		doc.parent = '/' + copy.catalog + '/' + (copy.title || Untitled).replace(/\s/g,'_') + '-' + copy._id;
 		doc.hidden = true;
 		doc._id = id;
 		doc.catalog = '@' + req.user.name;
 		doc.title = copy.title;
 		doc.text = '';
 		doc.slug = '';
+		console.log(doc)
 		doc.save(function(err) {
 			if (err) return next(err);
 			req.user.save(function(err) {
@@ -781,8 +782,8 @@ module.exports = function(app, passport, share) {
 		console.log(req.params);
 		var doc = req.doc;
 		var messages = req.messages || [];
-		if (req.params.rev) {
-			revision('draft', req.id, req.params.rev, function(err, snapshot) {
+		//if (req.params.rev) {
+		revision('draft', req.id, req.params.rev || doc.v, function(err, snapshot) {
        			console.log('here')
        			console.log(err)
        			if (err) return next(err);
@@ -801,21 +802,6 @@ module.exports = function(app, passport, share) {
 					});
         		}
       		});
-		} else {
-			if (req.xhr) {
-				res.send(doc.data || '(doc)');
-			} else {
-				res.render('readonly', { 
-					doc:doc,
-					sexpr:doc.data,
-					catalog: req.catalog,
-					owns: JSON.stringify(req.owns),
-					writes: JSON.stringify(req.writes),
-					docId: req.doc.id,
-					messages: JSON.stringify(messages),
-				});
-			}
-		}
 		
 		//req.collection -- might be a user
 		//if no rev number then it should get the published version
