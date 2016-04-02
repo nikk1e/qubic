@@ -104,6 +104,7 @@ module.exports = function(app, passport, share) {
 		var sexpr = req.body.sexpr;
 		var id = genId();
 		var doc = new Document();
+		//TODO: this should be setting the revision.
 		doc.parent = '/' + copy.catalog + '/' + (copy.title || Untitled).replace(/\s/g,'_') + '-' + copy._id;
 		doc.hidden = true;
 		doc._id = id;
