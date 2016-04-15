@@ -5,19 +5,24 @@ var User = require('../models/user');
 var Collection = require('../models/collection');
 var Document = require('../models/document');
 
-router.get('/settings', function(req, res, next) {
-  res.render('me/settings');
-});
-
-router.get('/models', function(req, res, next) {
-  res.redirect('models/drafts');
-});
-
+//Do not cache any of the settings pages
 router.all('*', function(req, res, next) {
     res.header("Cache-Control", "no-cache, no-store, must-revalidate");
     res.header("Pragma", "no-cache");
     res.header("Expires",0);
     next();
+});
+
+router.get('', function(req, res) {
+  res.redirect('profile');
+})
+
+router.get('profile', function(req, res) {
+  res.render('me/settings');
+});
+
+router.get('collections', function(req, res) {
+  //TODO: render a list of the collections I am a member of
 });
 
 function modifiableCollections(req, res, next) {
@@ -58,31 +63,7 @@ router.all('/models/*', modifiableCollections, function(req, res, next) {
     });
 })
 
-router.get('/models/drafts', function(req, res, next) {
-  Document.find({
-    'catalog':('@' + req.user.name),
-    'status':'draft',
-  }, 'title slug created updated', function(err, docs){
-    res.render('me/stories-draft', { stories:(docs || []) });
-  });
-});
-
-router.get('/models/public', modifiableCollections, function(req, res, next) {
-  Document.find({
-     'catalog':{$in: req.collections},'status':'public',
-  }, 'title slug created updated', function(err, docs){
-    res.render('me/stories-public', { stories:(docs || []) });
-  });
-});
-
-router.get('/models/unlisted', function(req, res, next) {
-  Document.find({
-    'catalog':('@' + req.user.name),
-    'status':'unlisted',
-  }, 'title slug created updated', function(err, docs){
-    res.render('me/stories-unlisted', { stories:(docs || []) });
-  });
-});
+//status 'public','unlisted','private'
 
 router.get('/collections', function(req, res, next) {
   var user = req.user;

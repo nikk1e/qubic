@@ -16,14 +16,12 @@ var Socket       = require('browserchannel').server;
 var Duplex       = require('stream').Duplex;
 
 var mongoose     = require('mongoose');
-var passport     = require('passport');
 var flash        = require('connect-flash');
 
 var ntlm         = require('express-ntlm');
 
-var auth         = require('./config/passport');
-auth(passport);
-//auth.config;
+var auth     = require('./config/passport');
+var passport = auth.passport;
 
 var app = express();
 
@@ -32,53 +30,21 @@ app.locals.env = process.env;
 app.locals.moment = require('moment');
 
 var ot = require('ot-sexpr');
-var sharejs = require('share');
 
 livedb.ot.registerType(ot);
 
 var MONGODB_URL = process.env.MONGODB_URL ||
-  'mongodb://localhost:27017/qube?auto_reconnect';
+  'mongodb://localhost:27017/qube';
 var AD_CONTROLLER = process.env.AD_CONTROLLER;
 
 //we have two connections to mongodb
 mongoose.connect(MONGODB_URL);
 var db = livedbMongo(MONGODB_URL, {safe:false});
 var backend = livedb.client(db);
-var share = sharejs.server.createClient({backend: backend});
+
+var share = require('./controllers/share')(backend);
 
 app.locals.backend = backend;
-
-share.use(function(req, next) {
-  //TODO: op filter for share docs here
-  next();
-});
-
-var pv = {}
-share.preValidate = function(op, doc) {
-  if (op.op != undefined) {
-    pv[doc.docName + ':' + doc.v] = doc.data.toSexpr()
-  }
-}
-
-share.validate = function(op, doc) {
-  if (op.op != undefined) {
-    try {
-      var key = doc.docName + ':' + doc.v;
-      var prevSS = pv[key];
-      delete pv[key];
-      var o = ot.invert(op.op);
-      var prev = ot.apply(doc.data, o);
-      var prevS = prev.toSexpr();
-      if (prevSS != prevS) {
-        return 'Inverse does not match original';
-      }
-    } catch(e) {
-      console.log(e)
-      return "Could not invert op";
-    }
-  }
-  return;
-}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -93,6 +59,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/fonts", express.static("node_modules/font-awesome"));
 app.use("/pgp", express.static("node_modules/openpgp/dist"));
+
 if (AD_CONTROLLER) app.use(ntlm({ domaincontroller: AD_CONTROLLER }));
 
 // required for passport
@@ -150,7 +117,7 @@ app.use(Socket(function(client, req) {
   });
 
   // Give the stream to sharejs
-  return share.listen(stream, client);
+  return share.client.listen(stream, client);
 }));
 
 // provide rack for ids (new rack every 2 hours)
@@ -190,11 +157,27 @@ function isLoggedIn(req, res, next) {
 }
 
 app.use('/admin', isLoggedIn, require('./routes/admin'));
-app.use('/me', isLoggedIn, require('./routes/me'));
-app.use('/search', require('./routes/search'))
-app.use('/api/share', share.rest())
+app.use('/me', isLoggedIn, require('./routes/settings'));
+app.use('/search', require('./routes/search'));
+
+app.use('/auth', require('./routes/auth'));
+app.use('/unlink', isLoggedIn, require('./routes/unlink'));
+
+app.use('/api/share', share.client.rest())
+//all other routes served by index.
 require('./routes/index')(app, passport, share);
 
+//TODO: :docName param
+//TODO: :cName param
+//TODO: canRead
+//app.get('/api/:cName/:docName/ops', canRead, share.ops);
+//app.get('/api/:cName/:docName/hist/:rev?', canRead, share.history);
+//app.get('/archive/:cName/:docName/:rev', function(req, res, next) {
+//    share.revision(req.params.cName, req.params.docName, req.params.rev, function(err, snapshot) {
+//        if (err) next(err);
+//        res.send(snapshot.toSexpr()); //TODO: check request type and render doc as html or json
+//      });
+//  })
 
 
 // catch 404 and forward to error handler

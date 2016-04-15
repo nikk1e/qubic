@@ -17,7 +17,7 @@ var userSchema = Schema({
     email            : String,
     displayName      : String, //Set to same as name initially
     bio              : String,
-    //manual collection references
+    //manual collection references (should be all the collections we want to access)
     following        : [{ type: Schema.Types.ObjectId, ref: 'Collection' }],
     public_keys      : [Key], //first is default
     private_keys     : [Key], //first is default
