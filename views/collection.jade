@@ -7,7 +7,7 @@ block header
 block content
   .content.wide
     if (showEdit)
-      a.btn.pull-right(href="#{collection.name}/edit")
+      a.btn.pull-right(href="/collection/settings/#{collection.name}")
         | Edit Collection 
         em.fa.fa-pencil-square-o
     h1= collection.title

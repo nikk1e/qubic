@@ -1,0 +1,56 @@
+extends layout
+
+block content
+  .content
+    h1 Keys
+    h2 Public
+    each key in user.public_keys
+      p= key.description
+      textarea= key.key
+      p Added on #{moment(key.created).format('ll')}
+    h2 Private
+    each key in user.private_keys
+      p= key.description
+      p= key.fingerprint.match(/.{1,2}/g).join(':')
+      p Added on #{moment(key.created).format('ll')}
+    form#key-form(action='keys',method='post')
+      .form-group.title
+        label.sr-only(for='key-title') Title
+        input#key-title.form-control.key-title(type='text',  placeholder='Title', name='description')
+      .form-group.key
+        label.sr-only(for='key-key') Key         
+        textarea#key-key.form-control.key-key(placeholder='PGP ascii   armored key', name='key')
+      .form-group.passphrase
+        label.sr-only(for='key-passphrase') Passphrase         
+        input#key-passphrase.form-control.key-passphrase(type='password',  placeholder='Passphrase', name='passphrase')
+      input#key-user(type='hidden', name='user', value="#{user.name} <#{user  .email}>")
+      a#generateKey.btn.btn-block.btn-cta-primary(href='#generate')   Generate Key
+      button.btn.btn-block.btn-cta-primary(type='submit') Add Key
+  
+    script(type='text/javascript' src='/pgp/openpgp.js')
+    script.
+      openpgp.initWorker('/pgp/openpgp.worker.js')
+      console.error = console.log
+      function generateKey() {
+        var form = document.getElementById('key-form');
+        if (form.elements['passphrase'].value.length < 3) {
+          //set some validation here.
+          return false;
+        }
+        var options = {
+          numBits: 2048,
+          userId: form.elements['user'].value,
+          passphrase: form.elements['passphrase'].value
+        };
+        openpgp.generateKeyPair(options).then(function(keypair) {
+          var privkey = keypair.privateKeyArmored;
+          form.elements['key'].value = privkey;
+          console.log(privkey);
+        }).catch(function(error) {
+          // failure
+          console.log(error)
+        });
+        form.elements['passphrase'].value = ''; //clear passphrase
+        return false;
+      }
+      document.getElementById('generateKey').onclick=generateKey;  

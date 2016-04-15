@@ -1,12 +1,12 @@
-extends layout
+extends ../layout
 
 
 block header
-  include ./includes/header.jade
+  include ../includes/header.jade
 
 block content
   .content
-    h1 New Collection
+    h1 Edit Collection
     form.pure-form.pure-form-stacked.pure-g(method='post')
       fieldset
         label.pure-u-1 Name
@@ -21,4 +21,4 @@ block content
         input.pure-u-1(name='readers', placeholder='Readers',value="#{collection.readers.join(', ')}")
         label.pure-u-1 Writers
         input.pure-u-1(name='writers', placeholder='Writers',value="#{collection.writers.join(', ')}")
-        button.pure-button.pure-button-primary.btn(type='submit') Create
+        button.pure-button.pure-button-primary.btn(type='submit') Update

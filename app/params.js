@@ -3,34 +3,76 @@ var Collection = require('../models/collection'); //org
 var Document   = require('../models/document');
 var User       = require('../models/user');
 
-module.exports = (app) => {
-	app.param('title', function(req, res, next, title) {
-		var ts = title.split(/-/g);
-		var id = ts[ts.length-1];
-		req.id = id;
-		Document.findOne({ '_id' :  id }, function(err, doc) {
-    		if (err) {
-      			next(err);
-    		} else if (doc) {
-      			req.doc = doc;
-      			next();
-    		} else {
-    			console.log('failed to find doc')
-      			next(new Error('failed to load doc'));
-    		}
-  		});
-	});
+function findDocument(req, res, next, title) {
+  var ts = title.split(/-/g);
+  var id = ts[ts.length-1];
+  req.id = id;
+  Document.findOne({ '_id' :  id }, function(err, doc) {
+      if (err) {
+          next(err);
+      } else if (doc) {
+          req.doc = doc;
+          next();
+      } else {
+        console.log('failed to find doc')
+          next(new Error('failed to load doc'));
+      }
+    });
+}
 
-	app.param('name', function(req, res, next, name) {
-		User.findOne({ 'name' :  name }, function(err, user) {
-    		if (err) {
-      			next(err);
-    		} else if (user) {
-      			req.collection = user;
-      			next();
-    		} else {
-      			next(new Error('failed to load user'));
-    		}
-  		});
-	});
+function findUser(req, res, next, name) {
+  User.findOne({ 'name' :  name }, function(err, user) {
+    if (err) {
+        next(err);
+    } else if (user) {
+        req.collection = user;
+        req.catalog = '@' + user.name;
+        req.is_collection = false;
+        if (req.isAuthenticated() && req.user.name == name) {
+          req.collection_writer = true;
+          req.collection_reader = true;
+          req.collection_owner = true;
+        }
+        next();
+    } else {
+        next(new Error('failed to load user'));
+    }
+  });
+}
+
+function findCollection(req, res, next, name) {
+  Collection.findOne({ 'name' :  name }, function(err, collection) {
+        if (err) {
+            next(err);
+        } else if (collection) {
+            req.catalog = collection.name;
+            req.collection = collection;
+            req.is_collection = true;
+            if (req.isAuthenticated()) {
+              var username = req.user.name;
+              req.collection_owner = (collection.owners.indexOf(username) > -1);
+              req.collection_writer = req.collection_owner ||
+                (collection.writers.indexOf(username) > -1);
+              req.collection_reader = req.collection_writer ||
+                (collection.readers.indexOf(username) > -1);
+            }
+            next();
+        } else {
+            next(new Error('failed to load collection'));
+        }
+    });
+}
+
+function findCatalog(req, res, next, catalog) {
+  if (name[0] === '@')
+    findUser(req, res, next, catalog.slice(1));
+   else
+    findCollection(req, res, next, catalog);
+}
+
+module.exports = {
+  findDocument,
+  findUser,
+  findCollection,
+  findCatalog
 };

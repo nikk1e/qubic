@@ -3,7 +3,6 @@ var router = express.Router();
 
 var User = require('../models/user');
 var Collection = require('../models/collection');
-var Document = require('../models/document');
 
 //Do not cache any of the settings pages
 router.all('*', function(req, res, next) {
@@ -18,54 +17,10 @@ router.get('', function(req, res) {
 })
 
 router.get('profile', function(req, res) {
-  res.render('me/settings');
+  res.render('settings/profile');
 });
 
-router.get('collections', function(req, res) {
-  //TODO: render a list of the collections I am a member of
-});
-
-function modifiableCollections(req, res, next) {
-  var user = req.user;
-  var userCatalog = ('@'+user.name);
-  Collection.find({ $or: [
-    {'owners':user.name},
-    {'writers':user.name},
-  ]}, {'name':1,'_id':0})
-  .lean()
-  .exec(function(err, collections) {
-    var names = collections.map(function(doc) { return doc.name; });
-    names.push(userCatalog);
-    req.collections = names;
-    next();
-  });
-}
-
-router.all('/models/*', modifiableCollections, function(req, res, next) {
-    Document.aggregate()
-    .match( { 'catalog':{$in: req.collections}} )
-    .group({
-      _id : "$status",
-      count: { $sum: 1 }
-    }).exec(function (err, response) {
-      if (err) next(err);
-      var counts = {
-        'draft': 0,
-        'public': 0,
-        'unlisted': 0,
-      };
-      for (var i = response.length - 1; i >= 0; i--) {
-        var r = response[i];
-        counts[r._id] = r.count;
-      };
-      req.counts = counts;
-      next();
-    });
-})
-
-//status 'public','unlisted','private'
-
-router.get('/collections', function(req, res, next) {
+router.get('collections', function(req, res, next) {
   var user = req.user;
   Collection.find({ $or: [
     {owners:user.name},
@@ -89,7 +44,7 @@ router.get('/collections', function(req, res, next) {
       else
         reads.push(col);
     };
-    res.render('me/collections', {
+    res.render('settings/collections', {
       collections:collections,
       owns:owns,
       writes:writes,
@@ -99,20 +54,11 @@ router.get('/collections', function(req, res, next) {
   });
 });
 
-// keys ---
-
-//also want this on the profile/public_key
-router.get('/keys', function(req, res) {
-  res.send(req.user.public_keys);
+router.get('keys', function(req, res) {
+  res.render('settings/keys');
 });
 
-//should not be accessable anywhere else 
-//(requires user authentication)
-router.get('/private_keys', function(req, res) {
-  res.send(req.user.private_keys);
-});
-
-router.post('/keys', function(req, res) {
+router.post('keys', function(req, res) {
   var user = req.user;
   var openpgp = require('openpgp');
   var ascii = req.body.key;
@@ -142,7 +88,7 @@ router.post('/keys', function(req, res) {
   user.save(function (err) {
     if (err)
       res.send(err);                 
-    res.redirect('settings')
+    res.render('settings/keys');
   });
 });
 

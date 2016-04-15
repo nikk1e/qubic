@@ -23,6 +23,9 @@ var ntlm         = require('express-ntlm');
 var auth     = require('./config/passport');
 var passport = auth.passport;
 
+var params   = require('./app/params');
+var doc      = require('./controllers/document');
+
 var app = express();
 
 app.locals.auth = auth.config;
@@ -162,10 +165,32 @@ app.use('/search', require('./routes/search'));
 
 app.use('/auth', require('./routes/auth'));
 app.use('/unlink', isLoggedIn, require('./routes/unlink'));
+app.use('/collection', isLoggedIn, require('./routes/collection'));
 
 app.use('/api/share', share.client.rest())
+
 //all other routes served by index.
-require('./routes/index')(app, passport, share);
+require('./routes/index')(app);
+
+app.param('title', params.findDocument);
+app.param('collection', params.findCollection);
+app.param('name', params.findUser);
+app.param('catalog', params.findCatalog);
+
+app.get('/@:name', doc.listed, function(req, res) {
+  res.render('profile', {
+    user: req.collection,
+    stories: (req.docs || []),
+  });
+});
+
+app.get('/:collection', doc.listed, function(req, res) {
+  res.locals.showEdit = !!req.collection_owner
+  res.render('collection', {
+    collection: req.collection,
+    stories: (req.docs || []) //TODO: rename
+  });
+});
 
 //TODO: :docName param
 //TODO: :cName param
@@ -179,6 +204,31 @@ require('./routes/index')(app, passport, share);
 //      });
 //  })
 
+function show_revision(req, res, next) {
+  console.log(req.params);
+  var doc = req.doc;
+  var messages = req.messages || [];
+  //if (req.params.rev) {
+  share.revision('draft', req.id, req.params.rev || doc.v, function(err, snapshot) {
+          console.log('here')
+          console.log(err)
+          if (err) return next(err);
+          console.log(snapshot.toSexpr())
+          if (req.xhr) {
+        res.send(snapshot.toSexpr() || '(doc)');
+      } else {
+        res.render('readonly', {
+          doc:doc,
+          sexpr:snapshot.toSexpr(),
+          catalog: req.catalog,
+          owns: JSON.stringify(req.owns),
+          writes: JSON.stringify(req.writes),
+          docId: req.doc.id,
+          messages: JSON.stringify(messages),
+        });
+      }
+  });
+}
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
