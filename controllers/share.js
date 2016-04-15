@@ -1,38 +1,6 @@
-var sharejs = require('share');
 
 module.exports = (backend) => {
-	const share = sharejs.server.createClient({backend: backend});
-	share.use(function(req, next) {
-	  //TODO: op filter for share docs here
-	  next();
-	});
-	
-	var pv = {}
-	share.preValidate = function(op, doc) {
-	  if (op.op != undefined) {
-	    pv[doc.docName + ':' + doc.v] = doc.data.toSexpr()
-	  }
-	}
-	
-	share.validate = function(op, doc) {
-	  if (op.op != undefined) {
-	    try {
-	      var key = doc.docName + ':' + doc.v;
-	      var prevSS = pv[key];
-	      delete pv[key];
-	      var o = ot.invert(op.op);
-	      var prev = ot.apply(doc.data, o);
-	      var prevS = prev.toSexpr();
-	      if (prevSS != prevS) {
-	        return 'Inverse does not match original';
-	      }
-	    } catch(e) {
-	      console.log(e)
-	      return "Could not invert op";
-	    }
-	  }
-	  return;
-	};
+
 
 	//return ops in range
 	function ops(req, res, next) {
@@ -74,7 +42,6 @@ module.exports = (backend) => {
     }
 
     function revision(cName, docName, rev, next) {
-    	var backend = share.backend;
     	console.log(cName)
     	console.log(docName)
     	backend.fetch(cName, docName, function(err, doc) {
@@ -115,7 +82,6 @@ module.exports = (backend) => {
     }
 
 	return {
-		client: share,
 		ops,
 		history,
 		revision

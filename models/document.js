@@ -18,6 +18,9 @@ var documentSchema = mongoose.Schema({
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
 	status: { type: String, default: 'draft' },
+	deny: [String],
+	writers: [String],
+	readers: [String],
 	parent: String
 });
 

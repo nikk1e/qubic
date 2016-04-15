@@ -5,7 +5,7 @@ window.Slate = Slate;
 
 document.addEventListener('DOMContentLoaded', function () {
 
-	var wrapElm = document.getElementById('wrap');
+    var wrapElm = document.getElementById('wrap');
     var plugins = Slate.plugins;
     var Selection = Slate.Selection;
 	var Region = Slate.Region;
@@ -34,14 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	var catalog = window.catalog || 'unknown';
 
 	sharedoc.whenReady(function() {
-		if (!sharedoc.type)
+		if (!sharedoc.type) {
 			sharedoc.create('sexpr', doc);
-		else
+		}
+		else {
 			sharedoc.snapshot = Slate.type.deserialize(sharedoc.snapshot);
+		}
 		store = new Slate.Store(sharedoc.createContext(), Slate.type);
-
+		console.log('HAVE STORE')
 		store.select(sel);
-
+		console.log('selected')
 		window.wrap = Wrap({store: store,
 			catalog: catalog,
 			docId: window.docId,
@@ -49,7 +51,13 @@ document.addEventListener('DOMContentLoaded', function () {
 			status: window.docStatus || 'draft',
 			messages: window.messages || [],
 		});
+		console.log('wrapped')
 
-		e.friar.renderComponent(wrap, wrapElm);
+		try {
+			e.friar.renderComponent(wrap, wrapElm);
+		} catch (e) {
+			console.log('Failed at render')
+			console.log(e);
+		}
 	});	
 });

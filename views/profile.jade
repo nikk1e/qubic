@@ -8,7 +8,7 @@ block content
       each story in stories
         .story-block
           h3.title
-            a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_')}-#{story._id}")= (story.title || 'Untitled')
-          a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_')}-#{story._id}")= story.slug
+            a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= (story.title || 'Untitled')
+          a(href="/#{story.catalog}/#{(story.title || '').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= story.slug
           .meta-line
             span #{moment(story.updated).fromNow()}

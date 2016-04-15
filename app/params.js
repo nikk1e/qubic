@@ -7,11 +7,18 @@ function findDocument(req, res, next, title) {
   var ts = title.split(/-/g);
   var id = ts[ts.length-1];
   req.id = id;
+  var username = req.user ? req.user.name : '';
   Document.findOne({ '_id' :  id }, function(err, doc) {
       if (err) {
           next(err);
       } else if (doc) {
           req.doc = doc;
+          req.deny = (doc.deny.indexOf(username) > -1);
+          req.writer = doc.status == 'full' ||
+            (doc.writers.indexOf(username) > -1);
+          req.reader = doc.status == 'public' ||
+            req.writer ||
+            (doc.readers.indexOf(username) > -1);
           next();
       } else {
         console.log('failed to find doc')
@@ -27,6 +34,7 @@ function findUser(req, res, next, name) {
     } else if (user) {
         req.collection = user;
         req.catalog = '@' + user.name;
+        res.locals.catalog = req.catalog;
         req.is_collection = false;
         if (req.isAuthenticated() && req.user.name == name) {
           req.collection_writer = true;
@@ -46,6 +54,7 @@ function findCollection(req, res, next, name) {
             next(err);
         } else if (collection) {
             req.catalog = collection.name;
+            res.locals.catalog = req.catalog;
             req.collection = collection;
             req.is_collection = true;
             if (req.isAuthenticated()) {
@@ -64,7 +73,7 @@ function findCollection(req, res, next, name) {
 }
 
 function findCatalog(req, res, next, catalog) {
-  if (name[0] === '@')
+  if (catalog[0] === '@')
     findUser(req, res, next, catalog.slice(1));
    else
     findCollection(req, res, next, catalog);

@@ -14,6 +14,7 @@ var livedb       = require('livedb');
 var livedbMongo  = require('livedb-mongo');
 var Socket       = require('browserchannel').server;
 var Duplex       = require('stream').Duplex;
+var sharejs      = require('share');
 
 var mongoose     = require('mongoose');
 var flash        = require('connect-flash');
@@ -45,7 +46,7 @@ mongoose.connect(MONGODB_URL);
 var db = livedbMongo(MONGODB_URL, {safe:false});
 var backend = livedb.client(db);
 
-var share = require('./controllers/share')(backend);
+var sharec = require('./controllers/share')(backend);
 
 app.locals.backend = backend;
 
@@ -89,6 +90,39 @@ app.use(function(req,res,next){
     next();
 });
 
+const share = sharejs.server.createClient({backend: backend});
+share.use(function(req, next) {
+  //TODO: op filter for share docs here
+  next();
+});
+
+var pv = {}
+share.preValidate = function(op, doc) {
+  if (op.op != undefined) {
+    pv[doc.docName + ':' + doc.v] = doc.data.toSexpr()
+  }
+}
+
+share.validate = function(op, doc) {
+  if (op.op != undefined) {
+    try {
+      var key = doc.docName + ':' + doc.v;
+      var prevSS = pv[key];
+      delete pv[key];
+      var o = ot.invert(op.op);
+      var prev = ot.apply(doc.data, o);
+      var prevS = prev.toSexpr();
+      if (prevSS != prevS) {
+        return 'Inverse does not match original';
+      }
+    } catch(e) {
+      console.log(e)
+      return "Could not invert op";
+    }
+  }
+  return;
+};
+
 //sharejs websocket hookup
 app.use(Socket(function(client, req) {
   if (req.user) {
@@ -106,7 +140,7 @@ app.use(Socket(function(client, req) {
   };
 
   client.on('message', function(data) {
-    //console.log(JSON.stringify(data))
+    console.log(JSON.stringify(data))
     stream.push(data);
   });
 
@@ -120,7 +154,7 @@ app.use(Socket(function(client, req) {
   });
 
   // Give the stream to sharejs
-  return share.client.listen(stream, client);
+  return share.listen(stream, client);
 }));
 
 // provide rack for ids (new rack every 2 hours)
@@ -160,17 +194,58 @@ function isLoggedIn(req, res, next) {
 }
 
 app.use('/admin', isLoggedIn, require('./routes/admin'));
-app.use('/me', isLoggedIn, require('./routes/settings'));
+app.use('/settings', isLoggedIn, require('./routes/settings'));
 app.use('/search', require('./routes/search'));
-
 app.use('/auth', require('./routes/auth'));
 app.use('/unlink', isLoggedIn, require('./routes/unlink'));
 app.use('/collection', isLoggedIn, require('./routes/collection'));
+app.use('/api/share', share.rest())
 
-app.use('/api/share', share.client.rest())
+app.get('/', function(req, res) {
+  if (req.isAuthenticated()) {
+    return res.redirect('/@' + req.user.name);
+  }
+  //TODO: render static front page
+  res.render('index', { documents:[], writerOf:[]} );
+});
 
-//all other routes served by index.
-require('./routes/index')(app);
+
+function genId() {
+  var rid = app.locals.rack();
+  var hour = app.locals.rackHour.toString(36);
+  return hour + rid;
+}
+
+app.post('/:catalog/new', isLoggedIn, function(req, res, next) {
+  var id = genId();
+  var doc = new Document();
+  doc.hidden = true;
+  doc._id = id;
+  doc.catalog = req.catalog;
+  doc.title = '';
+  doc.slug = '';
+  doc.save(function(err) {
+    if (err) return next(err);
+    req.user.save(function(err) {
+      if (err) return next(err);
+      res.redirect('/' + req.catalog + '/untitled-' + id);
+    });
+  });
+});
+
+app.get('/logout', function(req, res) {
+  req.logout();
+  res.redirect('/');
+});
+
+if (AD_CONTROLLER) {
+  //login goes to ad controller
+  app.get('/login', function(req, res) { 
+    res.redirect('/auth/ad'); 
+  });
+} else {
+  app.use(require('./routes/login'));
+}
 
 app.param('title', params.findDocument);
 app.param('collection', params.findCollection);
@@ -192,18 +267,38 @@ app.get('/:collection', doc.listed, function(req, res) {
   });
 });
 
+app.get('/:catalog/:title', doc.listed, function(req, res, next) {
+  if (!(req.collection_reader || req.reader) || req.deny)
+    return next(new Error(401)); // 401 Not Authorized
+  res.render('edit', {
+      title: 'Qubic',
+      doc: req.doc,
+      catalog: req.catalog,
+      owns: JSON.stringify(!!req.collection_owner),
+      writes: JSON.stringify(req.collection_writer || req.writer),
+      docId: req.id,
+      messages: JSON.stringify(req.messages || []),
+  });
+})
+
+app.post(':catalog/new', isLoggedIn, function(req, res, next) {
+  if (!(req.collection_writer))
+    return next(new Error(401)); // 401 Not Authorized
+
+})
+
 //TODO: :docName param
 //TODO: :cName param
 //TODO: canRead
-//app.get('/api/:cName/:docName/ops', canRead, share.ops);
-//app.get('/api/:cName/:docName/hist/:rev?', canRead, share.history);
+//app.get('/api/:cName/:docName/ops', canRead, sharec.ops);
+//app.get('/api/:cName/:docName/hist/:rev?', canRead, sharec.history);
 //app.get('/archive/:cName/:docName/:rev', function(req, res, next) {
 //    share.revision(req.params.cName, req.params.docName, req.params.rev, function(err, snapshot) {
 //        if (err) next(err);
 //        res.send(snapshot.toSexpr()); //TODO: check request type and render doc as html or json
 //      });
 //  })
-
+/*
 function show_revision(req, res, next) {
   console.log(req.params);
   var doc = req.doc;
@@ -221,15 +316,15 @@ function show_revision(req, res, next) {
           doc:doc,
           sexpr:snapshot.toSexpr(),
           catalog: req.catalog,
-          owns: JSON.stringify(req.owns),
-          writes: JSON.stringify(req.writes),
+          owns: JSON.stringify(req.collection_owner),
+          writes: JSON.stringify(req.writer),
           docId: req.doc.id,
           messages: JSON.stringify(messages),
         });
       }
   });
 }
-
+*/
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
