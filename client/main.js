@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			owns: window.owns || [],
 			status: window.docStatus || 'draft',
 			messages: window.messages || [],
+			url: window.url || ('/' + catalog + '/' + window.docId),
 		});
 		console.log('wrapped')
 

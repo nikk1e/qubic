@@ -157,7 +157,7 @@ var Publish = createClass({
 		var s = this.state;
 		var p = this.props;
 		var catalog = s.catalog || p.catalog;
-		return ((p.owns || []).indexOf(catalog) !== -1);
+		return p.owns;
 	},
 	render: function() {
 		var s = this.state;
@@ -239,6 +239,7 @@ var Wrap = createClass({
 		console.log('updateSlug');
 		var p = this.props;
 		var s = this.state;
+		var doc = p.store.document()
 		var req = new XMLHttpRequest();
 		//return false;
 		req.onreadystatechange = function (data) {
@@ -252,11 +253,11 @@ var Wrap = createClass({
   					console.log(req.responseText);
   			}
 		};
-		req.open('POST', '/edit/' + p.docId);
+		req.open('POST', p.url);
 		req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 		var obj = {
-			title:this.title,
-			slug:this.subtitle,
+			title:findTitle(doc),
+			slug:findSubtitle(doc),
 		};
 		console.log(JSON.stringify(obj))
 		req.send(JSON.stringify(obj));
@@ -268,22 +269,14 @@ var Wrap = createClass({
 		this.setState({
 			doc: p.store.document()
 		});
-		if (p.status === 'draft') {
-			var title = findTitle(s.doc);
-			var subtitle = findSubtitle(s.doc);
-			var self = this;
-			if (this.title !== title || this.subtitle !== subtitle) {
-				console.log('Titles have changed')
-				this.title = title;
-				this.subtitle = subtitle;
-				if (this.timeout)
-					clearTimeout(this.timeout);
-				this.timeout = setTimeout(function() {
-					self.timeout = null;
-					self.updateSlug();
-				}, 3000);
-			}
-		}
+		//Update the document (TODO: don't do this if paused)
+		if (this.timeout) //unless we have more than a minutes changes to save
+			clearTimeout(this.timeout);
+		var self = this;
+		this.timeout = setTimeout(function() {
+			self.timeout = null;
+			self.updateSlug();
+		}, 1000); //TODO: 0 if we have more than 1 minutes changes to save.
 	},
 	toggleSidebar: function(n) {
 		var s = this.state;

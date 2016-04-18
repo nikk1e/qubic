@@ -2,13 +2,9 @@ block header
   .toolbar
     a.btn.pull-left(href="/")
       em.fa.fa-cube
-    if (user)
-      a.btn.pull-right(href="/@"+user.name)
-        em.fa.fa-user
-    a.btn.pull-right(href="/play")
-      em.fa.fa-code
-    if (catalog)
-      a.btn.pull-right(href="/" + catalog + "/new")
-        em.fa.fa-plus
+    if (catalog && showNew)
+      form(action="/new/" + catalog, method="post")
+        button.btn.pull-right(type="submit")
+          em.fa.fa-plus
     a.btn.pull-right(href="/search")
       em.fa.fa-search

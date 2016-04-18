@@ -18,7 +18,7 @@ router.get('/signup', function(req, res) {
 });
 
 router.post('/signup', passport.authenticate('signup', {
-  successReturnToOrRedirect : '/me', // redirect to the secure profile section
+  successReturnToOrRedirect : '/', // redirect to the secure profile section
   failureRedirect : '/signup', // redirect back to the signup page if there is an error
   failureFlash : true // allow flash messages
 }));

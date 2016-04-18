@@ -183,7 +183,7 @@ function isLoggedIn(req, res, next) {
   if (req.isAuthenticated())
     return next();
 
-  if (req.session)
+  if (req.method == 'GET' && req.session)
     req.session.returnTo = req.originalUrl || req.url;
 
   //if we have active directory we use that.
@@ -253,6 +253,8 @@ app.param('name', params.findUser);
 app.param('catalog', params.findCatalog);
 
 app.get('/@:name', doc.listed, function(req, res) {
+  res.locals.showNew = !!req.collection_writer;
+  res.locals.showEdit = !!req.collection_owner;
   res.render('profile', {
     user: req.collection,
     stories: (req.docs || []),
@@ -260,7 +262,8 @@ app.get('/@:name', doc.listed, function(req, res) {
 });
 
 app.get('/:collection', doc.listed, function(req, res) {
-  res.locals.showEdit = !!req.collection_owner
+  res.locals.showNew = !!req.collection_writer;
+  res.locals.showEdit = !!req.collection_owner;
   res.render('collection', {
     collection: req.collection,
     stories: (req.docs || []) //TODO: rename
@@ -278,13 +281,74 @@ app.get('/:catalog/:title', doc.listed, function(req, res, next) {
       writes: JSON.stringify(req.collection_writer || req.writer),
       docId: req.id,
       messages: JSON.stringify(req.messages || []),
+      url: req.path
   });
-})
+});
 
-app.post(':catalog/new', isLoggedIn, function(req, res, next) {
+function loadSnapshot(req, res, next) {
+  try {
+    backend.fetch('draft', req.id, function(err, doc) {
+      if (err) return next(err);
+      if (!doc.type) return next('Unknown file');
+      res.locals.snapshot = doc;
+      return next();
+    });
+  } catch (e) {
+    console.log(e)
+    return next(e);
+  }
+}
+
+//TODO: move this to ot-sexpr
+
+ot.AttributedString.prototype.textContent = function() {
+  return this.str;
+};
+ot.List.prototype.textContent = function() {
+  if (!this._textContent) {
+    var ts = [];
+    this.values.forEach(function(x) {
+      if (typeof x.textContent === 'function')
+        ts.push(x.textContent());
+    });
+    this._textContent = ts.join(' '); //space or not?
+  }
+  return this._textContent;
+};
+
+//update a document in its current location
+//expected to be an ajax call.
+app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) {
+  if (!(req.collection_writer || req.writer) || req.deny)
+    return next(new Error(401)); // 401 Not Authorized
+  //update document
+  var doc = req.doc;
+  var body = req.body;
+
+  try {
+    var sexpr = ot.parse(res.locals.snapshot.data || '(doc)')[0];
+    doc.text = sexpr.textContent();
+  } catch (e) {
+    console.log(e);
+  }
+
+  //TODO: have a way to override the title.
+  doc.title = body.title || doc.title;
+  doc.slug = body.slug || doc.slug;
+  //update text content from the document snapshot
+
+  //TODO: have a way to update the document permissions and visability
+  doc.save(function(err) {
+    if (err) return next(err);
+    res.send({message:'Document updated'});
+  });
+});
+
+app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
   if (!(req.collection_writer))
     return next(new Error(401)); // 401 Not Authorized
-
+  //TODO: make a new doc here
+  res.redirect('/' + req.catalog)
 })
 
 //TODO: :docName param
