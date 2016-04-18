@@ -220,6 +220,7 @@ var Wrap = createClass({
 	getInitialState: function() {
 		return {
 			doc: this.props.store.document(),
+			paused: this.props.sharedoc.paused,
 			catalog: this.props.catalog,
 			sidebar: 'summary',
 			search: false,
@@ -273,6 +274,7 @@ var Wrap = createClass({
 		if (this.timeout) //unless we have more than a minutes changes to save
 			clearTimeout(this.timeout);
 		var self = this;
+		if (this.props.sharedoc.paused) return; //Don't update paused
 		this.timeout = setTimeout(function() {
 			self.timeout = null;
 			self.updateSlug();
@@ -305,6 +307,16 @@ var Wrap = createClass({
 	},
 	onMessageAck: function() {
 		this.setState({acknowledged:true});
+	},
+	pause: function() {
+		this.props.sharedoc.pause();
+		this.setState({paused: this.props.sharedoc.paused});
+	},
+	resume: function() {
+		this.props.sharedoc.resume();
+		this.updateSlug();
+		this.setState({paused: this.props.sharedoc.paused});
+
 	},
 	render: function() {
 		var p = this.props;
@@ -349,6 +361,10 @@ var Wrap = createClass({
 					docId: p.docId,
 					catalog: s.catalog,
 					store: p.store,
+					sharedoc: p.sharedoc,
+					pause: this.pause,
+					resume: this.resume,
+					paused: s.paused,
 				}),
 				s.editable ? 
 				Publish({

@@ -3,6 +3,7 @@ var DOM         = friar.DOM;
 var createClass = friar.createClass;
 
 var Toolbar = createClass({
+
 	render: function() {
 		var p = this.props;
 		var s = this.state;
@@ -20,6 +21,8 @@ var Toolbar = createClass({
 				[DOM.em({className:"fa fa-arrow-left"},"")]),
 			p.editable ? DOM.a({href:"#",className:"btn pull-right", onClick:p.togglePublish},
 				[DOM.em({className:"fa fa-cloud-upload"},"")]) : DOM.div({}),
+			DOM.a({href:"#",className:"btn pull-right", onClick: (p.paused ? p.resume : p.pause)},
+				[DOM.em({className:(p.paused ? "fa fa-play" : "fa fa-pause")},"")]),
 			DOM.form({action:"/copy/" + p.docId, method:'post',className:"pull-right"},
 				[DOM.input({type:'hidden', name:'sexpr', value:d}),
 				 DOM.button({type:'submit',className:"btn pull-right"},

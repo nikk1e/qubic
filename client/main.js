@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		store.select(sel);
 		console.log('selected')
 		window.wrap = Wrap({store: store,
+			sharedoc: sharedoc,
 			catalog: catalog,
 			docId: window.docId,
 			owns: window.owns || [],
