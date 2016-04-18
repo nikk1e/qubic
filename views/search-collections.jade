@@ -1,13 +1,7 @@
 extends layout
 
 block header
-  .toolbar
-    a.btn.pull-left(href="/")
-      em.fa.fa-cube
-    a.btn.pull-right(href="/me/models")
-      em.fa.fa-user
-    a.btn.pull-right(href="/new")
-      em.fa.fa-plus
+  include ./includes/header.jade
 
 block content
   .content.wide.search
