@@ -220,7 +220,8 @@ var Delete = createClass({
 				DOM.h3({},"Delete Model"),
 				DOM.hr({}),
 				DOM.p({},[DOM.span({},"Are you sure you want to delete "),DOM.strong({},p.title),DOM.span({},"?")]),
-				DOM.form({className:'',action:p.url + '/delete',method:'post'},[
+				DOM.form({className:'',action:p.url,method:'post'},[
+					DOM.input({type:'hidden', name:'del', value:'true'}),
 					DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
 					DOM.button({type:'submit',className:"pure-u-1-5 pure-button pure-button-primary"},"Delete")
 				])

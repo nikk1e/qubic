@@ -45,10 +45,13 @@ var AD_CONTROLLER = process.env.AD_CONTROLLER;
 mongoose.connect(MONGODB_URL);
 var db = livedbMongo(MONGODB_URL, {safe:false});
 var backend = livedb.client(db);
+var drafts = backend.collection('draft');
 
 var sharec = require('./controllers/share')(backend);
 
 app.locals.backend = backend;
+
+const Document = require('./models/document');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -87,6 +90,7 @@ if (AD_CONTROLLER) {
 app.use(function(req,res,next){
     res.locals.req = req;
     res.locals.user = req.user;
+    req.drafts = drafts; //livedb collection
     next();
 });
 
@@ -318,11 +322,28 @@ ot.List.prototype.textContent = function() {
   return this._textContent;
 };
 
+function deleteDoc(req, res, next) {
+  //TODO: delete the doc
+  req.drafts.submit(req.id, {del:true}, function(err) {
+    if (err) return next(err);
+    Document.remove({_id:req.id, catalog:req.catalog}, function(err) {
+      if (err) return next(err);
+      res.redirect('/' + req.catalog);
+    });
+  });
+}
+
 //update a document in its current location
 //expected to be an ajax call.
 app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) {
   if (!(req.collection_writer || req.writer) || req.deny)
     return next(new Error(401)); // 401 Not Authorized
+
+  if (req.body.del) {
+    console.log("Deleting: " + req.id);
+    return deleteDoc(req, res, next);
+  }
+  
   //update document
   var doc = req.doc;
   var body = req.body;
@@ -346,18 +367,17 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
   });
 });
 
-app.post('/:catalog/:title/delete', isLoggedIn, function(req, res, next) {
+app.delete('/:catalog/:title', isLoggedIn, function(req, res, next) {
   if (!(req.collection_writer || req.writer) || req.deny)
     return next(new Error(401)); // 401 Not Authorized
-  //TODO: delete document
-  res.redirect('/' + req.params.catalog);
+  deleteDoc(req, res, next);
 });
 
 app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
   if (!(req.collection_writer))
     return next(new Error(401)); // 401 Not Authorized
   //TODO: make a new doc here
-  res.redirect('/' + req.catalog)
+  
 })
 
 //TODO: :docName param
