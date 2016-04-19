@@ -221,6 +221,42 @@ var History = createClass({
 	}
 });
 
+//list of errors for the current open notebook
+var ErrorList = createClass({
+	render: function() {
+		return DOM.div({className:'errors'},[
+			DOM.h3({key:'errors'},"Errors"),
+		]);
+	},
+});
+
+//list of all stared items
+var Starred = createClass({
+	render: function() {
+		return DOM.div({className:'starred'},[
+			DOM.h3({key:'starred'},"Starred"),
+		]);
+	},
+});
+
+//list of collections
+var Collections = createClass({
+	render: function() {
+		return DOM.div({className:'collections'},[
+			DOM.h3({key:'collections'},"Collections"),
+		]);
+	},
+});
+
+//list of notebooks in the current collection
+var Notebooks = createClass({
+	render: function() {
+		return DOM.div({className:'notebooks'},[
+			DOM.h3({key:'notebooks'},"Notebooks"),
+		]);
+	},
+});
+
 var Sidebar = createClass({
 	render: function() {
 		var doc = this.props.doc;
@@ -231,13 +267,28 @@ var Sidebar = createClass({
 		if (showSearch && p.show === 'summary')
 			cname += ' with-search';
 
-		var Show = Summary;
+		var Show;
 		switch (p.show) {
 			case 'info':
 				Show = Info;
 				break;
 			case 'history':
 				Show = History;
+				break;
+			case 'starred':
+				Show = Starred;
+				break;
+			case 'errors':
+				Show = ErrorList;
+				break;
+			case 'collections':
+				Show = Collections;
+				break;
+			case 'notebooks':
+				Show = Notebooks;
+				break;
+			default:
+				Show = Summary;
 				break;
 		}
 		

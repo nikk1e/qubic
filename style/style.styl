@@ -274,6 +274,12 @@ padding-bottom: 30px;
 margin-bottom: 50px;
 }
 
+.book-content .settings {
+	border-bottom: 1px solid #ccc;
+padding-bottom: 30px;
+margin-bottom: 50px;
+}
+
 .book .sidebar .book-search {
     padding: 6px;
     background: transparent;
@@ -699,4 +705,72 @@ pre {
 
 .readonly .book .book-content {
 	background: #f4f4f4;
-}	
+}
+
+#modal {
+	visibility: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	transition: opacity 0.3s ease-in;
+	z-index: -1;
+}
+
+#modal.show-modal {
+	visibility: visible;
+	opacity: 1;
+	z-index: 2000;
+	background: rgba(255, 255, 255, 0.97);
+}
+
+#modal .pure-button {
+	margin-left: 0.5em;	
+}
+
+.delete-modal {
+	text-align: center;
+}
+
+.modal-icon {
+	color: #ccc;
+	font-size: 3em;
+}
+
+#modal h3 {
+	color: #ccc;
+	text-transform: uppercase;
+	margin-top: 0.3em;
+}
+
+#modal hr {
+	color: #ddd;
+	background-color: #ddd;
+	border: none;
+    	height: 1px;
+	width: 100px;
+}
+
+#modal p {
+	font-size: 1.8em;
+	line-height: 1.6em;
+}
+
+.modal-outer {
+    display: table;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+.modal-cell {
+	display: table-cell;
+	vertical-align: middle;
+}
+.modal-inner {
+	width: 650px;
+	margin: auto;
+}

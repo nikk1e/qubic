@@ -99,7 +99,7 @@ var Messages = createClass({
 	},
 });
 
-var Publish = createClass({
+var Settings = createClass({
 	getInitialState: function() {
 		var doc = this.props.doc;
 		return {
@@ -150,14 +150,8 @@ var Publish = createClass({
 			status:(s.unlisted ? 'unlisted':'public'),
 		};
 		req.send(JSON.stringify(obj));
-		p.togglePublish();
+		p.toggleSettings();
 		return false;
-	},
-	isPub: function() {
-		var s = this.state;
-		var p = this.props;
-		var catalog = s.catalog || p.catalog;
-		return p.owns;
 	},
 	render: function() {
 		var s = this.state;
@@ -165,9 +159,8 @@ var Publish = createClass({
 
 		var catalog = s.catalog || p.catalog;
 
-		var title = this.isPub() ? "Publish" : "Submit";
-		return DOM.div({className:"publish content"},[
-			DOM.h2({},title),
+		return DOM.div({className:"settings content"},[
+			DOM.h2({},"Settings"),
 			DOM.form({
 				className:'pure-form pure-form-stacked pure-g',
 				onChange: this.onChange,
@@ -210,11 +203,30 @@ var Publish = createClass({
 				DOM.button({
 					className:"pure-button pure-button-primary btn pure-u-1-5",
 					type:'submit',
-				},title)
+				},"Update")
 			]),
 		]);
 	},
 });
+
+var Delete = createClass({
+	render: function() {
+		var p = this.props;
+
+		return DOM.div({key:'delete-modal',className:'modal-outer'},[
+			DOM.div({className:'modal-cell'},[
+				DOM.div({className:'modal-inner delete-modal'},[
+				DOM.span({className:"fa fa-trash-o modal-icon"},""),
+				DOM.h3({},"Delete Model"),
+				DOM.hr({}),
+				DOM.p({},[DOM.span({},"Are you sure you want to delete "),DOM.strong({},p.title),DOM.span({},"?")]),
+				DOM.form({className:'',action:p.url + '/delete',method:'post'},[
+					DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
+					DOM.button({type:'submit',className:"pure-u-1-5 pure-button pure-button-primary"},"Delete")
+				])
+			])])]);
+	}
+})
 
 var Wrap = createClass({
 	getInitialState: function() {
@@ -224,7 +236,7 @@ var Wrap = createClass({
 			catalog: this.props.catalog,
 			sidebar: 'summary',
 			search: false,
-			publish: false,
+			showSettings: false,
 			editable: (docMode === 'edit'),
 			filter: '',
 		};
@@ -284,6 +296,20 @@ var Wrap = createClass({
 		var s = this.state;
 		this.setState({sidebar:(s.sidebar === n ? 'none' : n )});
 	},
+	onErrors: function() {
+		this.toggleSidebar('errors');
+	},
+	onNotebooks: function() {
+		this.toggleSidebar('notebooks');
+	},
+	onStarred: function() {
+		this.toggleSidebar('starred');
+	},
+	onCollections: function() {
+		//TODO: might want this to be a modal
+		// not a sidebar.
+		this.toggleSidebar('collections');
+	},
 	onSummary: function() {
 		this.toggleSidebar('summary');
 	},
@@ -302,8 +328,8 @@ var Wrap = createClass({
 	onSearchChange: function(e) {
 		this.setState({filter:e.target.value});
 	},
-	onPublish: function() {
-		this.setState({publish:(!(this.state.publish))});
+	onSettings: function() {
+		this.setState({showSettings:(!(this.state.showSettings))});
 	},
 	onMessageAck: function() {
 		this.setState({acknowledged:true});
@@ -317,6 +343,16 @@ var Wrap = createClass({
 		this.updateSlug();
 		this.setState({paused: this.props.sharedoc.paused});
 
+	},
+	star: function() {
+		//TODO: star document api
+		this.setState({starred: !this.state.starred});
+	},
+	showDelete: function() {
+		this.setState({modal: 'delete'});
+	},
+	closeDialog: function() {
+		this.setState({modal: undefined});
 	},
 	render: function() {
 		var p = this.props;
@@ -335,8 +371,21 @@ var Wrap = createClass({
 		var title = findTitle(s.doc);		
 		var subtitle = findSubtitle(s.doc);
 		var bcname = "book-content";
-		if (s.publish)
-			bcname += ' with-publish';
+		var modals = [];
+		var modal_class = '';
+		if (s.modal) {
+			modal_class = 'show-modal';
+			switch(s.modal) {
+				case 'delete':
+					modals = [Delete({
+						id: 'modal-dialog',
+						title: title,
+						url: p.url,
+						closeDialog: this.closeDialog
+					})];
+					break;
+			}
+		}
 		return DOM.div({className:cname}, [
 			Sidebar({
 				id:"sidebar",
@@ -356,7 +405,12 @@ var Wrap = createClass({
 					toggleInfo: this.onInfo,
 					toggleHistory: this.onHistory,
 					toggleSearch: this.onSearch,
-					togglePublish: this.onPublish,
+					toggleSettings: this.onSettings,
+					toggleErrors: this.onErrors,
+					toggleNotebooks: this.onNotebooks,
+					toggleCollections: this.onCollections,
+					toggleStarred: this.onStarred,
+					showDelete: this.showDelete,
 					editable: s.editable,
 					docId: p.docId,
 					catalog: s.catalog,
@@ -366,8 +420,8 @@ var Wrap = createClass({
 					resume: this.resume,
 					paused: s.paused,
 				}),
-				s.editable ? 
-				Publish({
+				s.showSettings ? 
+				Settings({
 					doc:s.doc,
 					docId: p.docId,
 					owns: p.owns,
@@ -375,7 +429,7 @@ var Wrap = createClass({
 					title: title,
 					status: p.status,
 					subtitle: subtitle,
-					togglePublish: this.onPublish,
+					toggleSettings: this.onSettings,
 				}) : DOM.div({}),
 				Messages({
 					acknowledged: s.acknowledged,
@@ -384,6 +438,7 @@ var Wrap = createClass({
 				}),
 				DOM.div({id:"preview"},[this.editor]),
 			]),
+			DOM.div({id:"modal",className:modal_class},modals),
 		]);
 	},
 });

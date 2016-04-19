@@ -270,6 +270,8 @@ app.get('/:collection', doc.listed, function(req, res) {
   });
 });
 
+//TODO: can we make catalog contain a / so we can have mavxg/proj/doc
+// and then restrict the notebooks in a collection to be 1 deep.
 app.get('/:catalog/:title', doc.listed, function(req, res, next) {
   if (!(req.collection_reader || req.reader) || req.deny)
     return next(new Error(401)); // 401 Not Authorized
@@ -342,6 +344,13 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
     if (err) return next(err);
     res.send({message:'Document updated'});
   });
+});
+
+app.post('/:catalog/:title/delete', isLoggedIn, function(req, res, next) {
+  if (!(req.collection_writer || req.writer) || req.deny)
+    return next(new Error(401)); // 401 Not Authorized
+  //TODO: delete document
+  res.redirect('/' + req.params.catalog);
 });
 
 app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
