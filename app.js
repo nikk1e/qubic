@@ -256,6 +256,16 @@ app.param('collection', params.findCollection);
 app.param('name', params.findUser);
 app.param('catalog', params.findCatalog);
 
+
+app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
+  if (!(req.collection_writer))
+    return next(new Error(401)); // 401 Not Authorized
+  //TODO: make a new doc here
+  res.send('hello')
+});
+
+//IMPORTANT: These routes need to come last as they might overlap a keyword
+
 app.get('/@:name', doc.listed, function(req, res) {
   res.locals.showNew = !!req.collection_writer;
   res.locals.showEdit = !!req.collection_owner;
@@ -372,13 +382,6 @@ app.delete('/:catalog/:title', isLoggedIn, function(req, res, next) {
     return next(new Error(401)); // 401 Not Authorized
   deleteDoc(req, res, next);
 });
-
-app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
-  if (!(req.collection_writer))
-    return next(new Error(401)); // 401 Not Authorized
-  //TODO: make a new doc here
-  
-})
 
 //TODO: :docName param
 //TODO: :cName param

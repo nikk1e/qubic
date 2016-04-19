@@ -129,6 +129,7 @@ var Info = createClass({
 			DOM.p({},"Italics: Ctrl+i"),
 			DOM.p({},"Superscript: Ctrl+."),
 			DOM.p({},"Subscript: Ctrl+,"),
+			DOM.p({},"Strike through: Alt+Shift+5"),
 			DOM.p({},"Code: Space (on new line)"),
 			DOM.p({},"Blockquote: > Space (on new line)"),
 			DOM.p({},"Heading 1: # Space (on new line)"),
