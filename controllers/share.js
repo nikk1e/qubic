@@ -59,8 +59,6 @@ module.exports = (backend) => {
     }
 
     function revision(cName, docName, rev, next) {
-    	console.log(cName)
-    	console.log(docName)
     	backend.fetch(cName, docName, function(err, doc) {
         if (err) return next(err);
         if (!doc.type) return next('Unknown file');
@@ -82,7 +80,6 @@ module.exports = (backend) => {
       			if (op.op) {
       				prev = snapshot;
       				o = ot._trim(op.op);
-      				console.log(o)
       				o = o.map(fix_utf8);
       				o = ot.invert(o);
       				snapshot = ot.apply(prev, o);

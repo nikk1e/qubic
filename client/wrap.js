@@ -250,6 +250,7 @@ var Wrap = createClass({
 		this.props.store.removeListener('change', this.onChange);
 	},
 	updateSlug: function() {
+		if (window.readonly) return;
 		console.log('updateSlug');
 		var p = this.props;
 		var s = this.state;
@@ -287,7 +288,7 @@ var Wrap = createClass({
 		if (this.timeout) //unless we have more than a minutes changes to save
 			clearTimeout(this.timeout);
 		var self = this;
-		if (this.props.sharedoc.paused) return; //Don't update paused
+		if (this.props.sharedoc.paused || !this.state.editable) return; //Don't update paused
 		this.timeout = setTimeout(function() {
 			self.timeout = null;
 			self.updateSlug();
