@@ -17,6 +17,7 @@
     JSONp.get = function(url, data, options) {
         var callback_name = 'callback_' + (sym++);
         var on_success = options.onSuccess || function(){};
+        var on_error = options.onError || function(){};
         var on_timeout = options.onTimeout || function(){};
         var timeout = options.timeout || 30; // sec
 
@@ -44,6 +45,11 @@
         script.type = 'text/javascript';
         script.async = true;
         script.src = src;
+        script.addEventListener('error', function(e){
+                window.clearTimeout(timeout_trigger);
+                removeScript(callback_name);
+                on_error(e);
+        });
 
         document.getElementsByTagName('head')[0].appendChild(script);
     };
