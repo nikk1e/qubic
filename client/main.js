@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		window.wrap = Wrap({store: store,
 			sharedoc: sharedoc,
 			catalog: catalog,
+			defaultCatalog: window.defaultCatalog,
 			docId: window.docId,
 			owns: window.owns || [],
 			status: window.docStatus || 'draft',

@@ -414,6 +414,8 @@ var Wrap = createClass({
 					showDelete: this.showDelete,
 					editable: s.editable,
 					docId: p.docId,
+					url: p.url,
+					defaultCatalog: p.defaultCatalog,
 					catalog: s.catalog,
 					store: p.store,
 					sharedoc: p.sharedoc,

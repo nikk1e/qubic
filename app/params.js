@@ -13,7 +13,6 @@ function findDocument(req, res, next, title) {
           next(err);
       } else if (doc) {
           req.doc = doc;
-          req.deny = (doc.deny.indexOf(username) > -1);
           req.writer = doc.status == 'full' ||
             (doc.writers.indexOf(username) > -1);
           req.reader = doc.status == 'public' ||

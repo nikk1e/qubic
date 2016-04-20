@@ -256,13 +256,37 @@ app.param('collection', params.findCollection);
 app.param('name', params.findUser);
 app.param('catalog', params.findCatalog);
 
+var DEFAULT_DOC = '(doc (section {"placeholder":"Add a title"}(h1 "") (p "")))'
 
-app.post('/new/:catalog', isLoggedIn, function(req, res, next) {
+function create(req, res, next) {
   if (!(req.collection_writer))
     return next(new Error(401)); // 401 Not Authorized
-  //TODO: make a new doc here
-  res.send('hello')
-});
+  var sexpr = req.body.sexpr || DEFAULT_DOC;
+  var id = genId();
+  var doc = new Document();
+  if (req.body.parent)
+    doc.parent = req.body.parent;
+  if (req.body.parent_version)
+    doc.parent_version = parseInt(req.body.parent_version);
+  doc._id = id;
+  doc.catalog = req.catalog;
+  doc.title = req.body.title || '';
+  doc.text = '';
+  doc.slug = '';
+  doc.status = 'private';
+  doc.save(function(err) {
+    if (err) return next(err);
+    backend.submit('draft',
+      id,
+      {v:0, create:{type:'sexpr', data:sexpr}},
+      function(err) {
+        if (err) return next(err);
+        res.redirect('/' + req.catalog + '/untitled-' + id);
+      });
+  });
+}
+
+app.post('/new/:catalog', isLoggedIn, create);
 
 //IMPORTANT: These routes need to come last as they might overlap a keyword
 
