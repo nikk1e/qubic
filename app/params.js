@@ -14,8 +14,10 @@ function findDocument(req, res, next, title) {
       } else if (doc) {
           req.doc = doc;
           req.writer = doc.status == 'full' ||
+            doc.status == 'full_unlisted' ||
             (doc.writers.indexOf(username) > -1);
           req.reader = doc.status == 'public' ||
+            doc.status == 'public_unlisted' ||
             req.writer ||
             (doc.readers.indexOf(username) > -1);
           next();

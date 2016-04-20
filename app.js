@@ -276,7 +276,7 @@ function create(req, res, next) {
   doc.status = 'private';
   doc.save(function(err) {
     if (err) return next(err);
-    backend.submit('draft',
+    req.drafts.submit(
       id,
       {v:0, create:{type:'sexpr', data:sexpr}},
       function(err) {
@@ -287,6 +287,39 @@ function create(req, res, next) {
 }
 
 app.post('/new/:catalog', isLoggedIn, create);
+
+
+function canRead(req, res, next) {
+  if (!(req.reader || req.collection_reader))
+    return next(new Error(401)); // 401 Not Authorized
+  next();
+}
+
+app.get('/api/history/:catalog/:title', canRead, function(req, res, next) {
+  var docName = req.id;
+  req.drafts.fetch(docName, function(err, doc) {
+      if (err) return next(err);
+      if (!doc.type) return next('Unknown file');
+      var to = parseInt(req.params.rev || doc.v);
+      var from = to - 10000;
+      if (from <= 0) from = 1;
+      req.drafts.getOps(docName, from, to, function(err, ops) {
+        if (err) return next(err);
+        var hist = [];
+        var last;
+        for (var i = ops.length - 1; i >= 0; i--) {
+          var op = ops[i];
+          var date = new Date(op.m.ts);
+          var d = date.valueOf()
+          if (last == undefined || d < (last - (15*60000)) ) {
+            hist.push({date:date.toISOString(), v:op.v});
+            last = d;
+          }
+        }
+        res.send({to:to, from:from, history:hist});
+      });
+  });
+});
 
 //IMPORTANT: These routes need to come last as they might overlap a keyword
 
@@ -308,11 +341,38 @@ app.get('/:collection', doc.listed, function(req, res) {
   });
 });
 
+
+app.get('/:catalog/:title/:rev', function(req, res, next) {
+  var doc = req.doc;
+  var messages = req.messages || [];
+  sharec.revision('draft', req.id, req.params.rev, function(err, snapshot) {
+      if (err) return next(err);
+          console.log(snapshot.toSexpr())
+      if (req.xhr) {
+        res.send(snapshot.toSexpr() || '(doc)');
+      } else {
+        res.render('readonly', {
+          title: 'Qubic',
+          doc:doc,
+          sexpr:snapshot.toSexpr(),
+          catalog: req.catalog,
+          owns: JSON.stringify(req.collection_owner),
+          writes: JSON.stringify(req.writer),
+          docId: req.doc.id,
+          messages: JSON.stringify(messages),
+          url: ('/' + req.params.catalog + '/' + req.params.title),
+        });
+      }
+  });
+});
+
 //TODO: can we make catalog contain a / so we can have mavxg/proj/doc
 // and then restrict the notebooks in a collection to be 1 deep.
-app.get('/:catalog/:title', doc.listed, function(req, res, next) {
+app.get('/:catalog/:title', doc.listed, loadSnapshot, function(req, res, next) {
   if (!(req.collection_reader || req.reader) || req.deny)
     return next(new Error(401)); // 401 Not Authorized
+  if (req.xhr)
+    return res.send(res.locals.snapshot.data || '(doc)');
   res.render('edit', {
       title: 'Qubic',
       doc: req.doc,
@@ -327,7 +387,7 @@ app.get('/:catalog/:title', doc.listed, function(req, res, next) {
 
 function loadSnapshot(req, res, next) {
   try {
-    backend.fetch('draft', req.id, function(err, doc) {
+    req.drafts.fetch(req.id, function(err, doc) {
       if (err) return next(err);
       if (!doc.type) return next('Unknown file');
       res.locals.snapshot = doc;
@@ -394,6 +454,8 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
   doc.slug = body.slug || doc.slug;
   //update text content from the document snapshot
 
+  //TODO: Update the location (must have write permission on the target)
+
   //TODO: have a way to update the document permissions and visability
   doc.save(function(err) {
     if (err) return next(err);
@@ -402,14 +464,11 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
 });
 
 app.delete('/:catalog/:title', isLoggedIn, function(req, res, next) {
-  if (!(req.collection_writer || req.writer) || req.deny)
+  if (!(req.collection_writer || req.writer))
     return next(new Error(401)); // 401 Not Authorized
   deleteDoc(req, res, next);
 });
 
-//TODO: :docName param
-//TODO: :cName param
-//TODO: canRead
 //app.get('/api/:cName/:docName/ops', canRead, sharec.ops);
 //app.get('/api/:cName/:docName/hist/:rev?', canRead, sharec.history);
 //app.get('/archive/:cName/:docName/:rev', function(req, res, next) {
