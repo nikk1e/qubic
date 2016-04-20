@@ -11,7 +11,7 @@ var Toolbar = createClass({
 	render: function() {
 		var p = this.props;
 		var s = this.state;
-		var d = p.store.document().toSexpr();
+		var d = p.doc.toSexpr();
 		return DOM.div({className:'toolbar'},[
 			DOM.a({href:"#",className:"btn pull-left", onClick:p.toggleSummary},
 				[DOM.em({className:"fa fa-align-justify"},"")]),

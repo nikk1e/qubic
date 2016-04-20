@@ -418,6 +418,7 @@ var Wrap = createClass({
 					defaultCatalog: p.defaultCatalog,
 					catalog: s.catalog,
 					store: p.store,
+					doc: s.doc,
 					sharedoc: p.sharedoc,
 					pause: this.pause,
 					resume: this.resume,
