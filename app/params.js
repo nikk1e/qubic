@@ -12,6 +12,8 @@ function findDocument(req, res, next, title) {
       if (err) {
           next(err);
       } else if (doc) {
+          if (req.catalog && doc.catalog !== req.catalog)
+            return res.redirect('/' + doc.catalog + '/' + title);
           req.doc = doc;
           req.writer = doc.status == 'full' ||
             doc.status == 'full_unlisted' ||

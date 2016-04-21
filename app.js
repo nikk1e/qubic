@@ -5,6 +5,8 @@ var logger       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 
+var Collection = require('./models/collection');
+
 var hat          = require('hat'); 
 
 //var session      = require('express-session');
@@ -26,6 +28,7 @@ var passport = auth.passport;
 
 var params   = require('./app/params');
 var doc      = require('./controllers/document');
+var userc    = require('./controllers/user');
 
 var app = express();
 
@@ -323,16 +326,16 @@ app.get('/api/history/:catalog/:title', canRead, function(req, res, next) {
 
 //IMPORTANT: These routes need to come last as they might overlap a keyword
 
-app.get('/@:name', doc.listed, function(req, res) {
+app.get('/@:name', doc.listed, userc.loadCatalogs, function(req, res) {
   res.locals.showNew = !!req.collection_writer;
   res.locals.showEdit = !!req.collection_owner;
   res.render('profile', {
-    user: req.collection,
+    collection: req.collection,
     stories: (req.docs || []),
   });
 });
 
-app.get('/:collection', doc.listed, function(req, res) {
+app.get('/:collection', doc.listed, userc.loadCatalogs, function(req, res) {
   res.locals.showNew = !!req.collection_writer;
   res.locals.showEdit = !!req.collection_owner;
   res.render('collection', {
@@ -340,7 +343,6 @@ app.get('/:collection', doc.listed, function(req, res) {
     stories: (req.docs || []) //TODO: rename
   });
 });
-
 
 app.get('/:catalog/:title/:rev', function(req, res, next) {
   var doc = req.doc;
@@ -358,6 +360,12 @@ app.get('/:catalog/:title/:rev', function(req, res, next) {
           catalog: req.catalog,
           owns: JSON.stringify(req.collection_owner),
           writes: JSON.stringify(req.writer),
+          owns_catalogs: JSON.stringify((res.locals.owns || []).map(function(c) { return { 
+            name: c.name,
+            catalog: c.catalog,
+            title: c.title,
+            description: c.description,
+          }; })),
           docId: req.doc.id,
           messages: JSON.stringify(messages),
           url: ('/' + req.params.catalog + '/' + req.params.title),
@@ -368,17 +376,24 @@ app.get('/:catalog/:title/:rev', function(req, res, next) {
 
 //TODO: can we make catalog contain a / so we can have mavxg/proj/doc
 // and then restrict the notebooks in a collection to be 1 deep.
-app.get('/:catalog/:title', doc.listed, loadSnapshot, function(req, res, next) {
+app.get('/:catalog/:title', doc.listed, loadSnapshot, userc.loadCatalogs, function(req, res, next) {
   if (!(req.collection_reader || req.reader) || req.deny)
     return next(new Error(401)); // 401 Not Authorized
   if (req.xhr)
     return res.send(res.locals.snapshot.data || '(doc)');
-  res.render('edit', {
+  res.render((req.doc.archived ? 'readonly' : 'edit'), {
       title: 'Qubic',
+      sexpr:(res.locals.snapshot.data || '(doc)'),
       doc: req.doc,
       catalog: req.catalog,
       owns: JSON.stringify(!!req.collection_owner),
       writes: JSON.stringify(req.collection_writer || req.writer),
+      owns_catalogs: JSON.stringify((res.locals.owns || []).map(function(c) { return { 
+        name: c.name,
+        catalog: c.catalog,
+        title: c.title,
+        description: c.description,
+      }; })),
       docId: req.id,
       messages: JSON.stringify(req.messages || []),
       url: req.path
@@ -427,15 +442,69 @@ function deleteDoc(req, res, next) {
   });
 }
 
+function moveDoc(req, res, next) {
+  var doc = req.doc;
+  if (!(req.collection_owner))
+    return next(new Error(401)); // 401 Not Authorized
+  doc.catalog = req.body.catalog
+  if (req.body.catalog == ('@' + req.user.name)) {
+    return doc.save(function(err) {
+      if (err) return next(err);
+      res.redirect('/' + req.body.catalog + '/' + req.params.title);
+    });
+  }
+  Collection.findOne({name:req.body.catalog, owners:req.user.name},function(err, col) {
+    if (err) return next(err);
+    doc.save(function(err) {
+      if (err) return next(err);
+      res.redirect('/' + req.body.catalog + '/' + req.params.title);
+    });
+  });
+}
+
+function archiveDoc(req, res, next) {
+  var doc = req.doc;
+  if (!(req.collection_owner))
+    return next(new Error(401)); // 401 Not Authorized
+  doc.archived = true;
+  doc.save(function(err) {
+    if (err) return next(err);
+    res.redirect('/' + req.params.catalog);
+  });
+}
+
+function unarchiveDoc(req, res, next) {
+  var doc = req.doc;
+  if (!(req.collection_owner))
+    return next(new Error(401)); // 401 Not Authorized
+  doc.archived = false;
+  doc.save(function(err) {
+    if (err) return next(err);
+    res.redirect('/' + req.params.catalog + '/' + req.params.title);
+  });
+}
+
 //update a document in its current location
 //expected to be an ajax call.
 app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) {
-  if (!(req.collection_writer || req.writer) || req.deny)
+  if (!(req.collection_writer || req.writer))
     return next(new Error(401)); // 401 Not Authorized
 
   if (req.body.del) {
     console.log("Deleting: " + req.id);
     return deleteDoc(req, res, next);
+  }
+
+  if (req.body.move) {
+    return moveDoc(req, res, next);
+  }
+
+  if (req.body.archive) {
+    return archiveDoc(req, res, next);
+  }
+
+  if (req.body.unarchive) {
+    return unarchiveDoc(req, res, next);
   }
   
   //update document
@@ -449,6 +518,9 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
     console.log(e);
   }
 
+  if (req.body.status && req.collection_writer)
+    doc.status = req.body.status;
+
   //TODO: have a way to override the title.
   doc.title = body.title || doc.title;
   doc.slug = body.slug || doc.slug;
@@ -456,8 +528,7 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
 
   //TODO: Update the location (must have write permission on the target)
 
-  //TODO: have a way to update the document permissions and visability
-  doc.save(function(err) {
+ doc.save(function(err) {
     if (err) return next(err);
     res.send({message:'Document updated'});
   });

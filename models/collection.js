@@ -26,4 +26,9 @@ collectionSchema.index({owners: 1});
 collectionSchema.index({writers: 1});
 collectionSchema.index({readers: 1});
 
+collectionSchema.virtual('catalog').get(function () {
+  return this.name;
+});
+
+
 module.exports = mongoose.model('Collection', collectionSchema);

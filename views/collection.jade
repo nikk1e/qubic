@@ -10,14 +10,29 @@ block content
       a.btn.pull-right(href="/collection/settings/#{collection.name}")
         | Edit Collection 
         em.fa.fa-pencil-square-o
-    h1= collection.title
-    if (stories.length > 0)
-      each story in stories
-        .story-block
-          h3.title
-            a(href="/#{collection.name}/#{(story.title || 'Untitled').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= (story.title || 'Untitled')
-          a(href="/#{collection.name}/#{(story.title || 'Untitled').replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= story.slug
-          .meta-line
-            span #{moment(story.updated).fromNow()}
-    else
-      p No models published yet.
+    header.col
+      h1= collection.title
+    .pure-g
+      .pure-u-6-24
+        if (user)
+          .col.search
+            ul.nav-v
+              each catalog in reads
+                li
+                  a(href="/#{catalog.catalog}") #{catalog.name}
+              li
+                a(href="/collection/new")
+                  em.fa.fa-plus  New Collection
+      .pure-u-18-24
+        .col
+          .heading.top-border
+            if (stories.length > 0)
+              each story in stories
+                .story-block
+                  h3.title
+                    a(href="/#{collection.name}/#{(story.title || 'Untitled').        replace(/\s/g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= (        story.title || 'Untitled')
+                  a(href="/#{collection.name}/#{(story.title || 'Untitled').replace(/\s        /g,'_').replace(/[^a-zA-Z0-9_]/g,'')}-#{story._id}")= story.slug
+                  .meta-line
+                    span #{moment(story.updated).fromNow()}
+            else
+              p No models published yet.

@@ -735,8 +735,18 @@ pre {
 	margin-left: 0.5em;	
 }
 
-.delete-modal {
+.button-error {
+	background: rgb(202, 60, 60); /* this is a maroon */
+	color: #fff;
+}
+
+.delete-modal, .settings-modal, .move-modal {
 	text-align: center;
+}
+
+.settings-modal form,
+.move-modal form {
+	text-align: left;
 }
 
 .modal-icon {
@@ -761,6 +771,11 @@ pre {
 #modal p {
 	font-size: 1.8em;
 	line-height: 1.6em;
+}
+
+.modal-button-row {
+	text-align: center;
+	margin-top: 1em;
 }
 
 .modal-outer {
