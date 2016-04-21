@@ -35,8 +35,8 @@ var Toolbar = createClass({
 				 DOM.button({type:'submit',className:"btn pull-right"},
 				 	[DOM.em({className:"fa fa-copy"},"")])
 				]),
-			DOM.a({href:"#",className:"btn pull-right", onClick:p.star},
-				[DOM.em({className:"fa fa-star-o"},"")]),
+			//DOM.a({href:"#",className:"btn pull-right", onClick:p.star},
+			//	[DOM.em({className:"fa fa-star-o"},"")]),
 			DOM.a({href:"#",className:"btn pull-right", onClick:p.showDelete},
 				[DOM.em({className:"fa fa-trash-o"},"")]),		
 			DOM.h1({},(p.title || 'Untitled')), //Put connected users here??
