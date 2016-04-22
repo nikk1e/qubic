@@ -6,7 +6,7 @@ block content
     var docId = '#{docId}';
     var docCollection = 'draft';
     var catalog = '#{doc.catalog}';
-    var defaultCatalog = '@#{user.name}';
+    var defaultCatalog = '@#{user ? user.name : "anonymous"}';
     var docStatus = '#{doc.status}';
     var parent = '#{doc.parent}';
     var owns = !{owns};

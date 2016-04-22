@@ -2,9 +2,17 @@ block header
   .toolbar
     a.btn.pull-left(href="/")
       em.fa.fa-cube
-    if (catalog && showNew)
-      form(action="/new/" + catalog, method="post")
+    if (showNew)
+      form(action="/new/" + newCatalog, method="post")
         button.btn.pull-right(type="submit")
           em.fa.fa-plus
+    else 
+      form(action="/try", method="post")
+        button.btn.pull-right(type="submit")
+          em.fa.fa-plus  Try Qubic
     a.btn.pull-right(href="/search")
       em.fa.fa-search
+    if (user)
+      a.pure-button.pull-right(href="/logout") Logout
+    else
+      a.pure-button.pull-right(href="/login") Login

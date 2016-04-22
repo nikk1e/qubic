@@ -6,12 +6,12 @@ block header
 
 block content
   .content.wide
-    if (showEdit)
-      a.btn.pull-right(href="/collection/settings/#{collection.name}")
-        | Edit Collection 
-        em.fa.fa-pencil-square-o
     header.col
-      h1= collection.title
+      h1.pure-u-4-5= collection.title
+      if (showEdit)
+        a.pure-u-1-5(href="/collection/settings/#{collection.name}")
+          | Edit Collection 
+          em.fa.fa-pencil-square-o
     .pure-g
       .pure-u-6-24
         if (user)

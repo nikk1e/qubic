@@ -200,6 +200,8 @@ function isLoggedIn(req, res, next) {
     res.redirect('/login');
 }
 
+function nop(req, res, next) { next(); }
+
 app.use('/admin', isLoggedIn, require('./routes/admin'));
 app.use('/settings', isLoggedIn, require('./routes/settings'));
 app.use('/search', require('./routes/search'));
@@ -208,14 +210,12 @@ app.use('/unlink', isLoggedIn, require('./routes/unlink'));
 app.use('/collection', isLoggedIn, require('./routes/collection'));
 app.use('/api/share', share.rest())
 
-app.get('/', function(req, res) {
+app.get('/', (AD_CONTROLLER ? isLoggedIn : nop), function(req, res) {
   if (req.isAuthenticated()) {
     return res.redirect('/@' + req.user.name);
   }
-  //TODO: render static front page
-  res.render('index', { documents:[], writerOf:[]} );
+  res.render('index' );
 });
-
 
 function genId() {
   var rid = app.locals.rack();
@@ -291,6 +291,27 @@ function create(req, res, next) {
 
 app.post('/new/:catalog', isLoggedIn, create);
 
+app.post('/try',function(req, res, next) {
+  var id = genId();
+  var doc = new Document();
+  var sexpr = req.body.sexpr || DEFAULT_DOC;
+  doc._id = id;
+  doc.catalog = 'anonymous';
+  doc.title = '';
+  doc.text = '';
+  doc.slug = '';
+  doc.status = 'full_unlisted'; //anyone can edit
+  doc.save(function(err) {
+    if (err) return next(err);
+    req.drafts.submit(
+      id,
+      {v:0, create:{type:'sexpr', data:sexpr}},
+      function(err) {
+        if (err) return next(err);
+        res.redirect('/' + doc.catalog + '/untitled-' + doc._id);
+      });
+  });
+});
 
 function canRead(req, res, next) {
   if (!(req.reader || req.collection_reader))
@@ -327,7 +348,12 @@ app.get('/api/history/:catalog/:title', canRead, function(req, res, next) {
 //IMPORTANT: These routes need to come last as they might overlap a keyword
 
 app.get('/@:name', doc.listed, userc.loadCatalogs, function(req, res) {
-  res.locals.showNew = !!req.collection_writer;
+  if (req.isAuthenticated()) {
+    res.locals.showNew = true;
+    res.locals.newCatalog = !!req.collection_writer ?
+      req.catalog :
+      req.user.catalog;
+  }
   res.locals.showEdit = !!req.collection_owner;
   res.render('profile', {
     collection: req.collection,
@@ -336,7 +362,12 @@ app.get('/@:name', doc.listed, userc.loadCatalogs, function(req, res) {
 });
 
 app.get('/:collection', doc.listed, userc.loadCatalogs, function(req, res) {
-  res.locals.showNew = !!req.collection_writer;
+  if (req.isAuthenticated()) {
+    res.locals.showNew = true;
+    res.locals.newCatalog = !!req.collection_writer ?
+      req.catalog :
+      req.user.catalog;
+  }
   res.locals.showEdit = !!req.collection_owner;
   res.render('collection', {
     collection: req.collection,
@@ -486,7 +517,7 @@ function unarchiveDoc(req, res, next) {
 
 //update a document in its current location
 //expected to be an ajax call.
-app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) {
+app.post('/:catalog/:title', loadSnapshot, function(req, res, next) {
   if (!(req.collection_writer || req.writer))
     return next(new Error(401)); // 401 Not Authorized
 
@@ -534,7 +565,7 @@ app.post('/:catalog/:title', isLoggedIn, loadSnapshot, function(req, res, next) 
   });
 });
 
-app.delete('/:catalog/:title', isLoggedIn, function(req, res, next) {
+app.delete('/:catalog/:title', function(req, res, next) {
   if (!(req.collection_writer || req.writer))
     return next(new Error(401)); // 401 Not Authorized
   deleteDoc(req, res, next);
