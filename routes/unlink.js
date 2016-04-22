@@ -10,29 +10,29 @@ var router = require('express').Router();
 //TODO: these should all just be api calls rather that urls.
 
 function update(proc) {
-	return (req, res) => {
+	return function(req, res){
 		var user = req.user
 		proc(user);
-		user.save((err) => {
+		user.save(function(err){
 			res.redirect('/settings/profile');
 		});
 	}
 }
 
-router.get('local', update((user) => {
+router.get('local', update(function(user){
 	user.local.email    = undefined;
 	user.local.password = undefined;
 }));
-router.get('facebook', update((user) => {
+router.get('facebook', update(function(user){
 	user.facebook.token = undefined;
 }));
-router.get('twitter', update((user) => {
+router.get('twitter', update(function(user){
 	user.twitter.token = undefined;
 }));
-router.get('google', update((user) => {
+router.get('google', update(function(user){
 	user.google.token = undefined;
 }));
-router.get('github', update((user) => {
+router.get('github', update(function(user){
 	user.github.token = undefined;
 }));
 

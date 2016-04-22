@@ -83,8 +83,8 @@ function findCatalog(req, res, next, catalog) {
 }
 
 module.exports = {
-  findDocument,
-  findUser,
-  findCollection,
-  findCatalog
+  findDocument:findDocument,
+  findUser:findUser,
+  findCollection:findCollection,
+  findCatalog:findCatalog
 };

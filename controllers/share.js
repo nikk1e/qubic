@@ -1,7 +1,6 @@
 var ot = require('ot-sexpr');
 
-module.exports = (backend) => {
-
+module.exports = function(backend){
 
 	//return ops in range
 	function ops(req, res, next) {
@@ -96,8 +95,8 @@ module.exports = (backend) => {
     }
 
 	return {
-		ops,
-		history,
-		revision
+		ops:ops,
+		history:history,
+		revision:revision
 	}
 }

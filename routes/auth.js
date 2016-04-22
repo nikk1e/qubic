@@ -1,14 +1,14 @@
 var router   = require('express').Router();
 var passport = require('passport');
 
-var pa = type => {
+var pa = function(type){
 	return passport.authenticate(type, {
 		successReturnToOrRedirect : '/',
 		failureRedirect : '/'
 	});
 }
 
-var pae = (type, scope) => {
+var pae = function(type, scope) {
 	return passport.authenticate(type, scope);
 }
 

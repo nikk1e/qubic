@@ -123,7 +123,6 @@ var SettingsModal = createClass({
 		return {
 			title: '',
 			subtitle: '',
-			catalog: '',
 			status: this.props.status,
 		};
 	},
@@ -142,7 +141,6 @@ var SettingsModal = createClass({
 		this.setState({
 			title: ele['title'].value || '',
 			subtitle: ele['subtitle'].value || '',
-			catalog: ele['catalog'].value || '',
 			status: status,
 		});
 	},
@@ -173,7 +171,6 @@ var SettingsModal = createClass({
 			title:(s.title || p.title),
 			slug:(s.subtitle || p.subtitle),
 			text:p.doc.textContent(),
-			data:p.doc.toSexpr(),
 			status:s.status,
 		};
 		req.send(JSON.stringify(obj));

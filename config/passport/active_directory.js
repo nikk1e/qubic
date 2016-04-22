@@ -1,7 +1,7 @@
 var CustomStrategy = require('passport-custom').Strategy;
-var User           = require('../models/user');
+var User           = require('../../models/user');
 
-module.exports = new CustomStrategy((req, done) => {
+module.exports = new CustomStrategy(function(req, done){
     //TODO: Is that vvvv how you are supposed to use flash?
     if (req.ntlm==undefined || req.ntlm.UserName==='')
         return done(null, false,
