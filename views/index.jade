@@ -1,24 +1,13 @@
 extends layout
 
+block header
+  include ./includes/header.jade
+
 block content
-  .content.wide
-    h1 Activity feed
-    .heading.top-border
-      if documents && documents.length > 0
-        each story in documents
-          if(writerOf[story.catalog])
-            .story-block
-              h3.title
-                a(href="/edit/#{story._id}")= (story.title || 'Untitled')
-              a(href="/edit/#{story._id}")= story.slug
-              .meta-line
-                span #{moment(story.updated).fromNow()}
-          else
-            .story-block
-              h3.title
-                a(href="/#{story.catalog}/#{(story.title || 'Untitled').replace(/\s/g,'_')}-#{story._id}")= (story.title || 'Untitled')
-              a(href="/#{story.catalog}/#{(story.title || 'Untitled').replace(/\s/g,'_')}-#{story._id}")= story.slug
-              .meta-line
-                span #{moment(story.updated).fromNow()}
-      else
-        p We couldn't find any models.
+  h1 Qubic
+  form.pure-g(action="/try", method="post")
+    button.pure-button.pure-u-1-5(type="submit")
+      em.fa.fa-plus  Try Qubic*
+    a.pure-button.pure-button-primary.pure-u-1-5(href="/signup") Sign Up
+  p
+    * no signup necissary

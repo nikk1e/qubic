@@ -42,9 +42,23 @@ module.exports = (backend) => {
     	});
     }
 
+    function fix_utf8(o) {
+      if (o.type === 'char') {
+        var x = o.value.length
+        try {
+        o.value = decodeURIComponent(escape(o.value));
+        if (o.value.length != o.n)
+          console.log(o)
+        if (o.value.length != x)
+          console.log(o)
+        } catch(e) {
+          console.log(o)
+        }
+      }
+      return o;
+    }
+
     function revision(cName, docName, rev, next) {
-    	console.log(cName)
-    	console.log(docName)
     	backend.fetch(cName, docName, function(err, doc) {
         if (err) return next(err);
         if (!doc.type) return next('Unknown file');
@@ -66,7 +80,6 @@ module.exports = (backend) => {
       			if (op.op) {
       				prev = snapshot;
       				o = ot._trim(op.op);
-      				console.log(o)
       				o = o.map(fix_utf8);
       				o = ot.invert(o);
       				snapshot = ot.apply(prev, o);

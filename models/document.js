@@ -17,7 +17,8 @@ var documentSchema = mongoose.Schema({
 	version: { type: Number, default: 0 },
 	created: { type: Date, default: Date.now },
 	updated: { type: Date, default: Date.now },
-	status: { type: String, default: 'draft' },
+	status: { type: String, default: 'private' },
+	archived: { type: Boolean, default: false }, //archive
 	writers: [String],
 	readers: [String],
 	parent: String,
@@ -37,6 +38,7 @@ documentSchema.index({
 	}
 });
 documentSchema.index({catalog: 1, status: 1});
+documentSchema.index({catalog: 1, status: 1, archived: 1});
 
 documentSchema.pre('save', function(next){
   now = new Date();

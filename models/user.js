@@ -68,6 +68,18 @@ userSchema.virtual('default_key').get(function () {
   return '';
 });
 
+userSchema.virtual('catalog').get(function () {
+  return '@' + this.name;
+});
+
+userSchema.virtual('title').get(function () {
+  return this.name;
+});
+
+userSchema.virtual('description').get(function () {
+  return this.bio;
+});
+
 userSchema.virtual('owners').get(function () {
   return [this.name];
 });

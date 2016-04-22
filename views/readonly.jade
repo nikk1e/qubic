@@ -7,12 +7,16 @@ block content
     var docId = '#{docId}';
     var docCollection = 'draft';
     var catalog = '#{doc.catalog}';
+    var defaultCatalog = '@#{user ? user.name : "anonymous"}';
     var docStatus = '#{doc.status}';
     var parent = '#{doc.parent}';
+    var owns_catalogs = !{owns_catalogs};
     var defaultKey = '#{user.default_key}';
     var owns = !{owns};
     var writes = !{writes};
     var docMode = 'read';
+    var readonly = true;
     var messages =  !{messages};
+    var url = '#{url}';
   script(type='text/javascript' src='/javascript/utils.js')  
   script(type='text/javascript' src='/javascript/main.js')

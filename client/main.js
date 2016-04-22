@@ -41,20 +41,18 @@ document.addEventListener('DOMContentLoaded', function () {
 			sharedoc.snapshot = Slate.type.deserialize(sharedoc.snapshot);
 		}
 		store = new Slate.Store(sharedoc.createContext(), Slate.type);
-		console.log('HAVE STORE')
 		store.select(sel);
-		console.log('selected')
 		window.wrap = Wrap({store: store,
 			sharedoc: sharedoc,
 			catalog: catalog,
 			defaultCatalog: window.defaultCatalog,
 			docId: window.docId,
 			owns: window.owns || [],
-			status: window.docStatus || 'draft',
+			status: window.docStatus || 'private',
 			messages: window.messages || [],
+			readonly: window.readonly,
 			url: window.url || ('/' + catalog + '/' + window.docId),
 		});
-		console.log('wrapped')
 
 		try {
 			e.friar.renderComponent(wrap, wrapElm);

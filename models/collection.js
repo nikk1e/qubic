@@ -9,6 +9,7 @@ var collectionSchema = mongoose.Schema({
 	owners:       [String], //Store these on the User
 	writers:      [String], //Can submit documents to collection (and edit a document in a colleciton)
 	readers:      [String],
+	featured:     { type: Boolean, default: false },
 });
 
 collectionSchema.index({
@@ -25,5 +26,11 @@ collectionSchema.index({
 collectionSchema.index({owners: 1});
 collectionSchema.index({writers: 1});
 collectionSchema.index({readers: 1});
+collectionSchema.index({featured: 1});
+
+collectionSchema.virtual('catalog').get(function () {
+  return this.name;
+});
+
 
 module.exports = mongoose.model('Collection', collectionSchema);

@@ -30,7 +30,7 @@ router.post('/new', function(req, res) {
 				collection:col
 			});
 		}
-		res.redirect(col.name);
+		res.redirect('../'+ col.name);
 	});
 });
 

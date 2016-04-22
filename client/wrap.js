@@ -2,7 +2,7 @@ var friar = require('friar');
 var DOM         = friar.DOM;
 var createClass = friar.createClass;
 
-var Toolbar = require('./toolbar');
+var Toolbars = require('./toolbar');
 var Sidebar = require('./sidebar');
 var Slate = require('slatejs');
 var plugins = Slate.plugins;
@@ -99,23 +99,49 @@ var Messages = createClass({
 	},
 });
 
-var Settings = createClass({
+var Delete = createClass({
+	render: function() {
+		var p = this.props;
+
+		return DOM.div({className:'modal-inner delete-modal'},[
+				DOM.span({className:"fa fa-trash-o modal-icon"},""),
+				DOM.h3({},"Delete Model"),
+				DOM.hr({}),
+				DOM.p({},[DOM.span({},"Are you sure you want to delete "),DOM.strong({},p.title),DOM.span({},"?")]),
+				DOM.form({className:'',action:p.url,method:'post'},[
+					DOM.input({type:'hidden', name:'del', value:'true'}),
+					DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
+					DOM.button({type:'submit',className:"pure-u-1-5 pure-button pure-button-primary"},"Delete")
+				])
+			]);
+	}
+})
+
+var SettingsModal = createClass({
 	getInitialState: function() {
 		var doc = this.props.doc;
 		return {
 			title: '',
 			subtitle: '',
-			catalog: '',
-			unlisted: (this.props.status === 'unlisted'),
+			status: this.props.status,
 		};
 	},
 	onChange: function(e) {
 		var ele = e.target.form.elements;
+
+		var statuses = ele['status'];
+		var status = 'private';
+		for (var i=0;i<statuses.length;i++) {
+			if (statuses[i].checked) {
+				status = statuses[i].value;
+				break;
+			}
+		}
+
 		this.setState({
 			title: ele['title'].value || '',
 			subtitle: ele['subtitle'].value || '',
-			catalog: ele['catalog'].value || '',
-			unlisted: !!ele['unlisted'].checked,
+			status: status,
 		});
 	},
 	onSubmit: function(e) {
@@ -126,8 +152,7 @@ var Settings = createClass({
 		var p = this.props;
 		var catalog = s.catalog || p.catalog;
 		var req = new XMLHttpRequest();
-		var url = (this.isPub() ? '/publish' : '/submit') +
-		  '/' + catalog + '/' + p.docId;
+		var url = p.url;
 		//return false;
 		req.onreadystatechange = function (data) {
   			// code
@@ -147,87 +172,204 @@ var Settings = createClass({
 			slug:(s.subtitle || p.subtitle),
 			text:p.doc.textContent(),
 			data:p.doc.toSexpr(),
-			status:(s.unlisted ? 'unlisted':'public'),
+			status:s.status,
 		};
 		req.send(JSON.stringify(obj));
-		p.toggleSettings();
+		p.closeDialog();
 		return false;
 	},
 	render: function() {
-		var s = this.state;
 		var p = this.props;
+		var s = this.state;
 
 		var catalog = s.catalog || p.catalog;
 
-		return DOM.div({className:"settings content"},[
-			DOM.h2({},"Settings"),
-			DOM.form({
-				className:'pure-form pure-form-stacked pure-g',
-				onChange: this.onChange,
-				onSubmit: this.onSubmit,
-			},[
-
-				DOM.label({'for':'title',className:"pure-u-1"},"Title"),
-				DOM.input({
-					className:"pure-u-1",
-					type:'text',
-					placeholder:p.title,
-					name:'title',
-					id:'title',
-					value:s.title}),
-				DOM.label({'for':'subtitle',className:"pure-u-1"},"Subtitle"),
-				DOM.textarea({
-					className:"pure-u-1",
-					placeholder:p.subtitle,
-					name:'subtitle',
-					id:'subtitle',
-				}, s.subtitle),
-				DOM.label({'for':'catalog',className:"pure-u-1"},"Catalog"),
-				DOM.input({
-					className:"pure-u-1",
-					type:'text',
-					placeholder:p.catalog,
-					name:'catalog',
-					id:'catalog',
-					value:s.catalog,
-				}),
-				DOM.label({'for':'unlisted', className:"pure-u-4-5"},[
-					DOM.input({
-						type:'checkbox',
-						id:'unlisted',
-						name:'unlisted',
-						checked: (s.unlisted ? 'checked' : undefined),
-					}),
-					DOM.text(" Private/Unlisted"),
-				]),
-				DOM.button({
-					className:"pure-button pure-button-primary btn pure-u-1-5",
-					type:'submit',
-				},"Update")
-			]),
-		]);
-	},
-});
-
-var Delete = createClass({
-	render: function() {
-		var p = this.props;
-
-		return DOM.div({key:'delete-modal',className:'modal-outer'},[
-			DOM.div({className:'modal-cell'},[
-				DOM.div({className:'modal-inner delete-modal'},[
-				DOM.span({className:"fa fa-trash-o modal-icon"},""),
-				DOM.h3({},"Delete Model"),
+		return DOM.div({className:'modal-inner settings-modal'},[
+				DOM.span({className:"fa fa-cog modal-icon"},""),
+				DOM.h3({},"Model Settings"),
 				DOM.hr({}),
-				DOM.p({},[DOM.span({},"Are you sure you want to delete "),DOM.strong({},p.title),DOM.span({},"?")]),
-				DOM.form({className:'',action:p.url,method:'post'},[
-					DOM.input({type:'hidden', name:'del', value:'true'}),
-					DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
-					DOM.button({type:'submit',className:"pure-u-1-5 pure-button pure-button-primary"},"Delete")
+				//DOM.p({},[DOM.span({},"Settings for "),DOM.strong({},p.title),DOM.span({},"?")]),
+				DOM.form({
+					className:'pure-form pure-form-stacked pure-g',
+					onChange: this.onChange,
+					onSubmit: this.onSubmit,
+				},[
+	
+					DOM.label({'for':'title',className:"pure-u-1"},"Title"),
+					DOM.input({
+						className:"pure-u-1",
+						type:'text',
+						placeholder:p.title,
+						name:'title',
+						id:'title',
+						value:s.title}),
+					DOM.label({'for':'subtitle',className:"pure-u-1"},"Subtitle"),
+					DOM.textarea({
+						className:"pure-u-1",
+						placeholder:p.subtitle,
+						name:'subtitle',
+						id:'subtitle',
+					}, s.subtitle),
+					DOM.label({'for':'status',className:"pure-u-1"},"Visibility"),
+					DOM.label({'for':'status_full', className:"pure-u-4-5"},[
+						DOM.input({
+							type:'radio',
+							id:'status_full',
+							name:'status',
+							value:'full',
+							checked: (s.status == 'full'),
+						}),
+						DOM.text(" Anyone can find and edit"),
+					]),
+					DOM.label({'for':'status_full_unlisted', className:"pure-u-4-5"},[
+						DOM.input({
+							type:'radio',
+							id:'status_full_unlisted',
+							name:'status',
+							value: 'full_unlisted',
+							checked: (s.status == 'full_unlisted'),
+						}),
+						DOM.text(" Anyone with the link can edit"),
+					]),
+					DOM.label({'for':'unlisted', className:"pure-u-4-5"},[
+						DOM.input({
+							type:'radio',
+							id:'status_public',
+							name:'status',
+							value:'public',
+							checked: (s.status == 'public'),
+						}),
+						DOM.text(" Anyone can find and read"),
+					]),
+					DOM.label({'for':'status_public_unlisted', className:"pure-u-4-5"},[
+						DOM.input({
+							type:'radio',
+							id:'status_public_unlisted',
+							name:'status',
+							value: 'public_unlisted',
+							checked: (s.status == 'public_unlisted'),
+						}),
+						DOM.text(" Anyone with the link can read"),
+					]),
+					DOM.label({'for':'status_private', className:"pure-u-4-5"},[
+						DOM.input({
+							type:'radio',
+							id:'status_private',
+							name:'status',
+							value: 'private',
+							checked: (s.status == 'private'),
+						}),
+						DOM.text(" Private"),
+					]),
+					DOM.div({className:"pure-g pure-u-1 modal-button-row"},[
+						DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
+						DOM.button({
+							className:"pure-button pure-button-primary btn pure-u-1-5",
+							type:'submit',
+						},"Update")
+					])
 				])
-			])])]);
+			]);
 	}
 })
+
+
+var MoveModal = createClass({
+	getInitialState: function() {
+		return {
+			catalog: this.props.catalog,
+			new_collection: '',
+		};
+	},
+	onChange: function(e) {
+		var ele = e.target.form.elements;
+
+		var new_collection = ele['name'];
+
+		var cats = ele['catalog'];
+		var cat = this.state.catalog;
+		for (var i=0;i<cats.length;i++) {
+			if (cats[i].checked) {
+				cat = cats[i].value;
+				break;
+			}
+		}
+		this.setState({catalog:cat, new_collection: new_collection});
+	},
+	render: function() {
+		var p = this.props;
+		var s = this.state;
+
+		var catalog = s.catalog;
+
+		var catalogs = window.owns_catalogs.map(function(c) {
+			var id = 'catalog_' + c.catalog
+			return DOM.label({key:id + '_label', for:id, className:"pure-u-4-5", title: c.description || c.name},[
+						DOM.input({
+							type:'radio',
+							id:id,
+							name:'catalog',
+							value:c.catalog,
+							checked: (c.catalog == catalog),
+						}),
+						DOM.text(" " + c.catalog),
+					]);
+		});
+
+		return DOM.div({className:'modal-inner move-modal'},[
+				DOM.span({className:"fa fa-book modal-icon"},""),
+				DOM.h3({},"Move Model"),
+				DOM.hr({}),
+				DOM.p({},[DOM.text("Move "),DOM.strong({},p.title || "Untitled"), DOM.text(" from "),DOM.strong({},p.catalog || "Untitled"),DOM.text(" to:")]),
+				DOM.form({
+					className:'pure-form pure-form-stacked pure-g',
+					//onChange: this.onChange,
+					action:p.url,
+					method:'post',
+				},[
+					DOM.input({type:'hidden', name:'move', value:'true'}),
+					DOM.div({className: "pure-u-1"},catalogs),
+					//DOM.label({'for':'catalog_new', className:"pure-u-4-5"},[
+					//	DOM.input({
+					//		type:'radio',
+					//		id:'catalog_new',
+					//		name:'catalog',
+					//		value:'_new_catalog',
+					//		checked: (s.catalog == '_new_catalog'),
+					//	}),
+					//	DOM.text(" Create new collection ..."),
+					//]),
+					//DOM.input({
+					//	className:"pure-u-1",
+					//	style: {"display": (s.catalog == '_new_catalog' ? "block" : "none")},
+					//	type:'text',
+					//	placeholder:"New catalog name",
+					//	name:'name',
+					//	id:'new-collection',
+					//	value:s.new_collection}),
+					DOM.div({className:"pure-g pure-u-1 modal-button-row"},[
+						DOM.a({className:"pure-button pure-u-1-5", onClick: p.closeDialog},"Cancel"),
+						DOM.button({
+							className:"pure-button pure-button-primary btn pure-u-1-5",
+							type:'submit',
+						},"Move")
+					])
+				]),
+				DOM.p({},[DOM.text("Archive "),DOM.strong({},p.title || "Untitled"), DOM.text(" in "), DOM.strong({},p.catalog|| "Untitled")]),
+				DOM.form({
+					className:'pure-form',
+					action:p.url,
+					method:'post',
+				},[
+					DOM.input({type:'hidden', name:'archive', value:'true'}),
+					DOM.div({className:"pure-g pure-u-1 modal-button-row"},[DOM.button({
+						className:"pure-button button-error btn pure-u-1-5",
+						type:'submit',
+					},"Archive")])
+				])
+			]);
+	}
+});
 
 var Wrap = createClass({
 	getInitialState: function() {
@@ -237,7 +379,6 @@ var Wrap = createClass({
 			catalog: this.props.catalog,
 			sidebar: 'summary',
 			search: false,
-			showSettings: false,
 			editable: (docMode === 'edit'),
 			filter: '',
 		};
@@ -250,6 +391,7 @@ var Wrap = createClass({
 		this.props.store.removeListener('change', this.onChange);
 	},
 	updateSlug: function() {
+		if (window.readonly) return;
 		console.log('updateSlug');
 		var p = this.props;
 		var s = this.state;
@@ -287,7 +429,7 @@ var Wrap = createClass({
 		if (this.timeout) //unless we have more than a minutes changes to save
 			clearTimeout(this.timeout);
 		var self = this;
-		if (this.props.sharedoc.paused) return; //Don't update paused
+		if (this.props.sharedoc.paused || !this.state.editable) return; //Don't update paused
 		this.timeout = setTimeout(function() {
 			self.timeout = null;
 			self.updateSlug();
@@ -329,9 +471,6 @@ var Wrap = createClass({
 	onSearchChange: function(e) {
 		this.setState({filter:e.target.value});
 	},
-	onSettings: function() {
-		this.setState({showSettings:(!(this.state.showSettings))});
-	},
 	onMessageAck: function() {
 		this.setState({acknowledged:true});
 	},
@@ -351,6 +490,12 @@ var Wrap = createClass({
 	},
 	showDelete: function() {
 		this.setState({modal: 'delete'});
+	},
+	showSettings: function() {
+		this.setState({modal: 'settings'});
+	},
+	showMove: function() {
+		this.setState({modal: 'move'});
 	},
 	closeDialog: function() {
 		this.setState({modal: undefined});
@@ -385,8 +530,32 @@ var Wrap = createClass({
 						closeDialog: this.closeDialog
 					})];
 					break;
+				case 'settings':
+					modals = [SettingsModal({
+						doc:s.doc,
+						docId: p.docId,
+						owns: p.owns,
+						catalog: s.catalog,
+						title: title,
+						status: p.status,
+						subtitle: subtitle,
+						url: p.url,
+						closeDialog: this.closeDialog
+				})];
+					break;
+				case 'move':
+					modals = [MoveModal({
+						doc:s.doc,
+						docId: p.docId,
+						owns: p.owns,
+						catalog: s.catalog,
+						title: title,
+						url: p.url,
+						closeDialog: this.closeDialog
+				})];
 			}
 		}
+		var Toolbar = p.readonly ? Toolbars.ToolbarReadonly : Toolbars.Toolbar;
 		return DOM.div({className:cname}, [
 			Sidebar({
 				id:"sidebar",
@@ -412,6 +581,8 @@ var Wrap = createClass({
 					toggleCollections: this.onCollections,
 					toggleStarred: this.onStarred,
 					showDelete: this.showDelete,
+					showSettings: this.showSettings,
+					showMove: this.showMove,
 					editable: s.editable,
 					docId: p.docId,
 					url: p.url,
@@ -424,17 +595,6 @@ var Wrap = createClass({
 					resume: this.resume,
 					paused: s.paused,
 				}),
-				s.showSettings ? 
-				Settings({
-					doc:s.doc,
-					docId: p.docId,
-					owns: p.owns,
-					catalog: s.catalog,
-					title: title,
-					status: p.status,
-					subtitle: subtitle,
-					toggleSettings: this.onSettings,
-				}) : DOM.div({}),
 				Messages({
 					acknowledged: s.acknowledged,
 					messages: p.messages,
@@ -442,7 +602,9 @@ var Wrap = createClass({
 				}),
 				DOM.div({id:"preview"},[this.editor]),
 			]),
-			DOM.div({id:"modal",className:modal_class},modals),
+			DOM.div({id:"modal",className:modal_class},[
+				DOM.div({className:'modal-outer'},[
+					DOM.div({className:'modal-cell'},modals)])]),
 		]);
 	},
 });

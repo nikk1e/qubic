@@ -152,9 +152,9 @@ var History = createClass({
 	loadMore: function() {
 		this.setState({more:false});
 		var req = new XMLHttpRequest();
-		var url = '/api/'+window.docCollection+'/'+window.docId+'/hist'
+		var url = '/api/history'+window.url
 		if (this.state.from)
-			url += '/' + this.state.from;
+			url += '?rev=' + this.state.from;
 		var updateHistory = this.updateHistory;
 		//return false;
 		req.onreadystatechange = function (data) {
