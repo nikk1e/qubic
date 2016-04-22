@@ -123,7 +123,6 @@ var SettingsModal = createClass({
 		return {
 			title: '',
 			subtitle: '',
-			catalog: '',
 			status: this.props.status,
 		};
 	},
@@ -142,7 +141,6 @@ var SettingsModal = createClass({
 		this.setState({
 			title: ele['title'].value || '',
 			subtitle: ele['subtitle'].value || '',
-			catalog: ele['catalog'].value || '',
 			status: status,
 		});
 	},
